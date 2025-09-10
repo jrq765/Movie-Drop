@@ -91,7 +91,7 @@ app.get('/m/:id', async (req, res) => {
                 <meta property="og:title" content="${movie.title} (${releaseYear})">
                 <meta property="og:description" content="${movie.overview || `Watch ${movie.title} on your favorite streaming platform`}">
                 <meta property="og:image" content="${movie.poster_path ? `https://image.tmdb.org/t/p/w780${movie.poster_path}` : 'https://moviedrop.app/og-image.jpg'}">
-                <meta property="og:url" content="http://192.168.0.31:3000/m/${movieId}">
+                <meta property="og:url" content="https://moviedrop.app/m/${movieId}">
                 <style>
                     * { margin: 0; padding: 0; box-sizing: border-box; }
                     body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: #f9fafb; }

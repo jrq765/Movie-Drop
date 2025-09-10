@@ -26,7 +26,7 @@ cd backend
 npm install
 
 # Start the server (API key is already configured)
-TMDB_API_KEY=778d52dd5314bd2cefb20648cdf8842f PORT=3000 npm start
+TMDB_API_KEY=your_tmdb_api_key_here PORT=3000 npm start
 ```
 
 The backend will start on `http://localhost:3000`

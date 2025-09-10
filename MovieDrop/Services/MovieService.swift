@@ -9,7 +9,7 @@ class MovieService: ObservableObject {
         print("🔍 MovieService: Starting search for '\(query)'")
         
         // Use TMDB API directly
-        let tmdbApiKey = "778d52dd5314bd2cefb20648cdf8842f"
+        let tmdbApiKey = Bundle.main.object(forInfoDictionaryKey: "TMDB_API_KEY") as? String ?? ""
         guard let encodedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
               let url = URL(string: "https://api.themoviedb.org/3/search/movie?api_key=\(tmdbApiKey)&query=\(encodedQuery)&language=en-US") else {
             print("❌ MovieService: Invalid URL")
