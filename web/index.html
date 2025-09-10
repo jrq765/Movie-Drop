@@ -3,188 +3,365 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MovieDrop - Share Movies Instantly</title>
-    <meta name="description" content="Share movies instantly with friends. Find where to watch, rent, or buy your favorite films.">
-    
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://moviedrop.app/">
-    <meta property="og:title" content="MovieDrop - Share Movies Instantly">
-    <meta property="og:description" content="Share movies instantly with friends. Find where to watch, rent, or buy your favorite films.">
-    <meta property="og:image" content="https://moviedrop.app/og-image.jpg">
-
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://moviedrop.app/">
-    <meta property="twitter:title" content="MovieDrop - Share Movies Instantly">
-    <meta property="twitter:description" content="Share movies instantly with friends. Find where to watch, rent, or buy your favorite films.">
-    <meta property="twitter:image" content="https://moviedrop.app/og-image.jpg">
-    
-    <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>MovieDrop - Watch Now</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 400px;
+            width: 100%;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .tagline {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        
+        .movie-info {
+            padding: 30px 20px;
+            text-align: center;
+        }
+        
+        .movie-poster {
+            width: 200px;
+            height: 300px;
+            border-radius: 12px;
+            margin: 0 auto 20px;
+            background: #f5f5f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 14px;
+        }
+        
+        .movie-poster img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 12px;
+        }
+        
+        .movie-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        
+        .movie-year {
+            color: #666;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+        
+        .movie-overview {
+            color: #666;
+            line-height: 1.5;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .providers {
+            margin-bottom: 20px;
+        }
+        
+        .providers-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .provider-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .provider-card {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            text-decoration: none;
+            color: #333;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .provider-card:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+        
+        .provider-logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            margin: 0 auto 8px;
+            background: #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .provider-name {
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .fallback-link {
+            background: #667eea;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 12px;
+            text-decoration: none;
+            display: block;
+            text-align: center;
+            font-weight: 500;
+            transition: background 0.3s ease;
+        }
+        
+        .fallback-link:hover {
+            background: #5a6fd8;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+        
+        .error {
+            text-align: center;
+            padding: 40px 20px;
+            color: #e74c3c;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
 </head>
 <body>
-    <div id="app">
-        <header class="header">
-            <div class="container">
-                <div class="logo">
-                    <h1>🎬 MovieDrop</h1>
-                </div>
-                <nav class="nav">
-                    <a href="#features" class="nav-link">Features</a>
-                    <a href="#download" class="nav-link">Download</a>
-                </nav>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🎬 MovieDrop</div>
+            <div class="tagline">Find where to watch your favorite movies</div>
+        </div>
+        
+        <div id="content">
+            <div class="loading">
+                <div class="spinner"></div>
+                <div>Loading movie details...</div>
             </div>
-        </header>
-
-        <main>
-            <!-- Hero Section -->
-            <section class="hero">
-                <div class="container">
-                    <div class="hero-content">
-                        <h2 class="hero-title">Share Movies Instantly</h2>
-                        <p class="hero-subtitle">
-                            Instead of sending clunky trailer links, create smart movie cards with 
-                            streaming availability and one-tap access to watch, rent, or buy.
-                        </p>
-                        <div class="hero-cta">
-                            <a href="#download" class="btn btn-primary">Download for iOS</a>
-                            <a href="#demo" class="btn btn-secondary">See How It Works</a>
-                        </div>
-                    </div>
-                    <div class="hero-image">
-                        <div class="phone-mockup">
-                            <div class="phone-screen">
-                                <div class="movie-card-demo">
-                                    <div class="movie-poster">
-                                        <div class="poster-placeholder">🎬</div>
-                                    </div>
-                                    <div class="movie-info">
-                                        <h3>Dune: Part Two</h3>
-                                        <p>Available on Netflix, Amazon Prime, Apple TV</p>
-                                        <div class="streaming-buttons">
-                                            <button class="stream-btn netflix">Watch on Netflix</button>
-                                            <button class="stream-btn prime">Watch on Prime</button>
-                                            <button class="stream-btn apple">Rent $3.99</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Features Section -->
-            <section id="features" class="features">
-                <div class="container">
-                    <h2 class="section-title">Why MovieDrop?</h2>
-                    <div class="features-grid">
-                        <div class="feature-card">
-                            <div class="feature-icon">🔍</div>
-                            <h3>Smart Search</h3>
-                            <p>Find any movie instantly with our powerful search powered by TMDB API.</p>
-                        </div>
-                        <div class="feature-card">
-                            <div class="feature-icon">📱</div>
-                            <h3>iMessage Integration</h3>
-                            <p>Share movie cards directly in iMessage, WhatsApp, and other messaging apps.</p>
-                        </div>
-                        <div class="feature-card">
-                            <div class="feature-icon">🎯</div>
-                            <h3>Streaming Availability</h3>
-                            <p>See exactly where to watch, rent, or buy with real-time availability data.</p>
-                        </div>
-                        <div class="feature-card">
-                            <div class="feature-icon">⚡</div>
-                            <h3>One-Tap Access</h3>
-                            <p>Direct links to streaming platforms for instant viewing.</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- How It Works -->
-            <section id="demo" class="how-it-works">
-                <div class="container">
-                    <h2 class="section-title">How It Works</h2>
-                    <div class="steps">
-                        <div class="step">
-                            <div class="step-number">1</div>
-                            <div class="step-content">
-                                <h3>Search</h3>
-                                <p>Type the movie name in the search bar</p>
-                            </div>
-                        </div>
-                        <div class="step">
-                            <div class="step-number">2</div>
-                            <div class="step-content">
-                                <h3>Create Card</h3>
-                                <p>MovieDrop generates a smart card with streaming info</p>
-                            </div>
-                        </div>
-                        <div class="step">
-                            <div class="step-number">3</div>
-                            <div class="step-content">
-                                <h3>Share</h3>
-                                <p>Send the card to friends via iMessage or other apps</p>
-                            </div>
-                        </div>
-                        <div class="step">
-                            <div class="step-number">4</div>
-                            <div class="step-content">
-                                <h3>Watch</h3>
-                                <p>Friends click to watch, rent, or buy instantly</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Download Section -->
-            <section id="download" class="download">
-                <div class="container">
-                    <div class="download-content">
-                        <h2>Get MovieDrop</h2>
-                        <p>Available now on the App Store</p>
-                        <a href="#" class="app-store-btn">
-                            <img src="app-store-badge.svg" alt="Download on the App Store">
-                        </a>
-                    </div>
-                </div>
-            </section>
-        </main>
-
-        <footer class="footer">
-            <div class="container">
-                <div class="footer-content">
-                    <div class="footer-section">
-                        <h4>MovieDrop</h4>
-                        <p>Share movies instantly with friends</p>
-                    </div>
-                    <div class="footer-section">
-                        <h4>Product</h4>
-                        <ul>
-                            <li><a href="#features">Features</a></li>
-                            <li><a href="#download">Download</a></li>
-                        </ul>
-                    </div>
-                    <div class="footer-section">
-                        <h4>Support</h4>
-                        <ul>
-                            <li><a href="mailto:support@moviedrop.app">Contact</a></li>
-                            <li><a href="/privacy">Privacy Policy</a></li>
-                            <li><a href="/terms">Terms of Service</a></li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="footer-bottom">
-                    <p>&copy; 2024 MovieDrop. All rights reserved.</p>
-                </div>
-            </div>
-        </footer>
+        </div>
     </div>
 
-    <script src="script.js"></script>
+    <script>
+        // Get movie ID and region from URL
+        const pathParts = window.location.pathname.split('/');
+        const movieId = pathParts[pathParts.length - 1];
+        const urlParams = new URLSearchParams(window.location.search);
+        const region = urlParams.get('region') || 'US';
+        
+        // TMDB API configuration
+        const TMDB_API_KEY = '778d52dd5314bd2cefb20648cdf8842f';
+        const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
+        
+        // Provider logos mapping
+        const PROVIDER_LOGOS = {
+            8: { name: 'Netflix', logo: 'https://image.tmdb.org/t/p/w92/t2yyOv40HZeVlLjYsCsPHnWLk4W.jpg' },
+            15: { name: 'Hulu', logo: 'https://image.tmdb.org/t/p/w92/gJ8VxIFsYc0MvLp1opDsUj16Yj.jpg' },
+            9: { name: 'Prime Video', logo: 'https://image.tmdb.org/t/p/w92/5ge4NqjHt4fDqYgqykpL5eQxMsy.jpg' },
+            35: { name: 'Apple TV+', logo: 'https://image.tmdb.org/t/p/w92/peURlLlr8jggOwK53fJ5wdQl05y.jpg' },
+            337: { name: 'Disney+', logo: 'https://image.tmdb.org/t/p/w92/dgPueyEdOwpQ10fjuhL2WYFQwQs.jpg' },
+            2: { name: 'Apple TV', logo: 'https://image.tmdb.org/t/p/w92/peURlLlr8jggOwK53fJ5wdQl05y.jpg' },
+            3: { name: 'Google Play', logo: 'https://image.tmdb.org/t/p/w92/t2yyOv40HZeVlLjYsCsPHnWLk4W.jpg' },
+            192: { name: 'YouTube', logo: 'https://image.tmdb.org/t/p/w92/2ioan5BX5L9tz4fIGU93blTeFhv.jpg' },
+            531: { name: 'Paramount+', logo: 'https://image.tmdb.org/t/p/w92/xTVM8pXTcXUZodac7osnrefrqP0.jpg' },
+            384: { name: 'HBO Max', logo: 'https://image.tmdb.org/t/p/w92/4KAy34EHvRM25Ih8wb82AuGU7zJ.jpg' }
+        };
+        
+        async function loadMovieDetails() {
+            try {
+                // Fetch movie details
+                const movieResponse = await fetch(`${TMDB_BASE_URL}/movie/${movieId}?api_key=${TMDB_API_KEY}&language=en-US`);
+                if (!movieResponse.ok) throw new Error('Movie not found');
+                const movie = await movieResponse.json();
+                
+                // Fetch watch providers
+                const providersResponse = await fetch(`${TMDB_BASE_URL}/movie/${movieId}/watch/providers?api_key=${TMDB_API_KEY}`);
+                const providersData = await providersResponse.json();
+                
+                const regionProviders = providersData.results[region.toLowerCase()];
+                
+                // Render movie details
+                renderMovieDetails(movie, regionProviders);
+                
+            } catch (error) {
+                console.error('Error loading movie:', error);
+                renderError('Movie not found or error loading details');
+            }
+        }
+        
+        function renderMovieDetails(movie, regionProviders) {
+            const content = document.getElementById('content');
+            
+            const posterUrl = movie.poster_path 
+                ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+                : null;
+            
+            const releaseYear = movie.release_date ? new Date(movie.release_date).getFullYear() : '';
+            
+            let providersHtml = '';
+            if (regionProviders) {
+                const allProviders = [
+                    ...(regionProviders.flatrate || []),
+                    ...(regionProviders.buy || []),
+                    ...(regionProviders.rent || [])
+                ];
+                
+                // Remove duplicates by provider_id
+                const uniqueProviders = allProviders.filter((provider, index, self) => 
+                    index === self.findIndex(p => p.provider_id === provider.provider_id)
+                );
+                
+                if (uniqueProviders.length > 0) {
+                    providersHtml = `
+                        <div class="providers">
+                            <div class="providers-title">Where to Watch</div>
+                            <div class="provider-grid">
+                                ${uniqueProviders.map(provider => {
+                                    const providerInfo = PROVIDER_LOGOS[provider.provider_id] || { 
+                                        name: provider.provider_name, 
+                                        logo: null 
+                                    };
+                                    const logoUrl = provider.logo_path 
+                                        ? `https://image.tmdb.org/t/p/w92${provider.logo_path}`
+                                        : providerInfo.logo;
+                                    
+                                    return `
+                                        <a href="${getProviderLink(movie, provider)}" class="provider-card" target="_blank">
+                                            <div class="provider-logo">
+                                                ${logoUrl ? `<img src="${logoUrl}" alt="${providerInfo.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">` : providerInfo.name.charAt(0)}
+                                            </div>
+                                            <div class="provider-name">${providerInfo.name}</div>
+                                        </a>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+            
+            content.innerHTML = `
+                <div class="movie-info">
+                    <div class="movie-poster">
+                        ${posterUrl ? `<img src="${posterUrl}" alt="${movie.title}">` : 'No poster available'}
+                    </div>
+                    <div class="movie-title">${movie.title}</div>
+                    <div class="movie-year">${releaseYear}</div>
+                    <div class="movie-overview">${movie.overview || 'No description available.'}</div>
+                    ${providersHtml}
+                    <a href="https://www.themoviedb.org/movie/${movieId}" class="fallback-link" target="_blank">
+                        View on TMDB
+                    </a>
+                </div>
+            `;
+        }
+        
+        function getProviderLink(movie, provider) {
+            const title = encodeURIComponent(movie.title);
+            const year = movie.release_date ? new Date(movie.release_date).getFullYear() : '';
+            
+            // Create direct links for major providers
+            switch (provider.provider_id) {
+                case 8: // Netflix
+                    return `https://www.netflix.com/search?q=${title}`;
+                case 9: // Prime Video
+                    return `https://www.amazon.com/s?k=${title}+${year}&i=instant-video`;
+                case 15: // Hulu
+                    return `https://www.hulu.com/search?q=${title}`;
+                case 35: // Apple TV+
+                    return `https://tv.apple.com/search?term=${title}+${year}`;
+                case 337: // Disney+
+                    return `https://www.disneyplus.com/search?q=${title}`;
+                case 192: // YouTube
+                    return `https://www.youtube.com/results?search_query=${title}+${year}+movie`;
+                default:
+                    // Fallback to TMDB region page
+                    return `https://www.themoviedb.org/movie/${movieId}/watch?region=${region}`;
+            }
+        }
+        
+        function renderError(message) {
+            const content = document.getElementById('content');
+            content.innerHTML = `
+                <div class="error">
+                    <div>❌ ${message}</div>
+                    <a href="https://www.themoviedb.org" class="fallback-link" style="margin-top: 20px; display: inline-block;">
+                        Go to TMDB
+                    </a>
+                </div>
+            `;
+        }
+        
+        // Load movie details when page loads
+        if (movieId && movieId !== 'index.html') {
+            loadMovieDetails();
+        } else {
+            renderError('Invalid movie ID');
+        }
+    </script>
 </body>
 </html>

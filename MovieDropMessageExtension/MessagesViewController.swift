@@ -49,16 +49,11 @@ struct MovieCardData {
 
 enum MessageComposer {
     static func buildURL(base: String, movieId: String, region: String) -> URL? {
-        // For now, redirect to TMDB movie page until Framer page is created
-        if base.contains("themoviedb.org") {
-            return URL(string: "\(base)/movie/\(movieId)")
-        } else {
-            // Original Framer format for when the page is created
-            var comps = URLComponents(string: base)
-            comps?.path = "/m/\(movieId)"
-            comps?.queryItems = [URLQueryItem(name: "region", value: region)]
-            return comps?.url
-        }
+        // Create branded landing page URL
+        var comps = URLComponents(string: base)
+        comps?.path = "/m/\(movieId)"
+        comps?.queryItems = [URLQueryItem(name: "region", value: region)]
+        return comps?.url
     }
 
     static func releaseYear(from date: String?) -> String {

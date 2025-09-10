@@ -1,37 +1,19 @@
-# MovieDrop Web App
+# MovieDrop Web - Branded Landing Pages
 
-This is the web component of MovieDrop that handles universal links from the iOS iMessage extension.
+This is your branded movie landing page system that creates Linktree-style pages for each movie shared through the iMessage extension.
 
-## Features
+## 🎬 Features
 
-- **Universal Links**: Handles `/m/[id]` routes for movie sharing
-- **Real TMDB Data**: Fetches movie information and streaming availability from TMDB API
-- **Responsive Design**: Works on mobile and desktop
-- **Ad Integration**: Optional Google Ad Manager integration
-- **SEO Optimized**: Proper meta tags and Open Graph data
+- **Branded Design**: Custom MovieDrop branding with gradient header
+- **Dynamic Movie Pages**: Each movie gets a unique URL like `/m/12345?region=US`
+- **Real Streaming Data**: Fetches actual availability from TMDB API
+- **Direct Provider Links**: Links directly to Netflix, Prime Video, Hulu, etc.
+- **Responsive Design**: Works perfectly on mobile and desktop
+- **Fallback Support**: Graceful handling when data isn't available
 
-## Environment Variables
+## 🚀 Quick Start
 
-Create a `.env.local` file with the following variables:
-
-```bash
-# Required
-TMDB_API_KEY=your_tmdb_api_key_here
-
-# App Configuration
-NEXT_PUBLIC_BASE_URL=https://moviedrop.app
-NEXT_PUBLIC_REGION_DEFAULT=US
-
-# Optional - App Store
-NEXT_PUBLIC_APP_STORE_URL=https://apps.apple.com/app/idXXXXXXXXX
-
-# Optional - Google Ad Manager
-NEXT_PUBLIC_GAM_NETWORK=123456
-NEXT_PUBLIC_GAM_SLOT_LEFT=/1234567/moviedrop_left
-NEXT_PUBLIC_GAM_SLOT_RIGHT=/1234567/moviedrop_right
-```
-
-## Setup
+### Local Development
 
 1. **Install dependencies**:
    ```bash
@@ -39,106 +21,89 @@ NEXT_PUBLIC_GAM_SLOT_RIGHT=/1234567/moviedrop_right
    npm install
    ```
 
-2. **Set up environment variables**:
+2. **Start the server**:
    ```bash
-   cp .env.example .env.local
-   # Edit .env.local with your actual values
-   ```
-
-3. **Run development server**:
-   ```bash
-   npm run dev
-   ```
-
-4. **Build for production**:
-   ```bash
-   npm run build
    npm start
    ```
 
-## Universal Links Setup
+3. **Test a movie page**:
+   ```
+   http://localhost:3000/m/550?region=US
+   ```
 
-### For Development
-The universal links are configured in `/public/.well-known/apple-app-site-association`. 
+### Deploy to Vercel
 
-### For Production
-1. Update the `appID` in the apple-app-site-association file with your actual Team ID
-2. Ensure the file is served at `https://moviedrop.app/.well-known/apple-app-site-association`
-3. Add Associated Domains capability to your iOS app:
-   - Add `applinks:moviedrop.app` to your app's Associated Domains
+1. **Install Vercel CLI**:
+   ```bash
+   npm i -g vercel
+   ```
 
-## Testing
+2. **Deploy**:
+   ```bash
+   vercel --prod
+   ```
 
-### Manual Test Plan
+3. **Update your domain** in iOS app's `Info.plist`:
+   ```xml
+   <key>MOVIEDROP_BASE_URL</key>
+   <string>https://your-vercel-domain.vercel.app</string>
+   ```
 
-1. **iMessage Extension**:
-   - Open Messages app
-   - Tap MovieDrop extension
-   - Search for a movie (e.g., "Dune")
-   - Tap a movie result
-   - Verify one message bubble appears with universal link
-   - Extension should compact to show Send button
+## 📱 How It Works
 
-2. **Universal Link**:
-   - Tap the message bubble
-   - Safari should open `https://moviedrop.app/m/[movieId]`
-   - Page should show:
-     - Movie poster, title, year, runtime
-     - Movie overview
-     - "Where to watch" section with streaming providers
-     - MovieDrop logo and App Store badge (if configured)
+1. **User taps movie** in iMessage extension
+2. **Creates message** with URL like `https://moviedrop.framer.website/m/12345?region=US`
+3. **Recipient taps card** → Opens your branded landing page
+4. **Page loads movie details** from TMDB API
+5. **Shows streaming providers** with direct links
+6. **User clicks provider** → Goes directly to watch the movie
 
-3. **Desktop**:
-   - Visit the URL directly in browser
-   - Should see left/right ad slots (if GAM configured)
-   - Mobile: ad slots should be hidden
+## 🎨 Customization
 
-## API Integration
+### Branding
+- Edit the gradient colors in the CSS
+- Change the logo text in the HTML
+- Update the tagline
 
-The app uses the TMDB API for:
-- Movie details (`/movie/{id}`)
-- Watch providers (`/movie/{id}/watch/providers`)
+### Providers
+- Add new providers in the `PROVIDER_LOGOS` object
+- Customize provider link generation in `getProviderLink()`
 
-All data is real - no mock data is used. If API calls fail, the page will show a 404 error.
+### Styling
+- Modify the CSS in the `<style>` section
+- Change colors, fonts, layout as needed
 
-## Ad Integration
+## 🔧 Configuration
 
-Google Ad Manager integration is optional:
-- If `NEXT_PUBLIC_GAM_*` environment variables are set, ad slots will render
-- If not set, ad slots are hidden completely
-- Ads only show on desktop (lg+ breakpoint)
+### Environment Variables
+- `PORT`: Server port (default: 3000)
+- `TMDB_API_KEY`: Your TMDB API key (hardcoded for now)
 
-## Deployment
+### TMDB API Key
+The API key is currently hardcoded in the HTML. For production, you should:
+1. Move it to environment variables
+2. Use a backend proxy to hide the key
+3. Or use server-side rendering
 
-The app is designed to be deployed to Vercel:
-1. Connect your GitHub repository to Vercel
-2. Set environment variables in Vercel dashboard
-3. Deploy automatically on push to main branch
+## 📊 Example URLs
 
-## Troubleshooting
+- **Fight Club**: `https://moviedrop.framer.website/m/550?region=US`
+- **Dune**: `https://moviedrop.framer.website/m/438631?region=US`
+- **Inception**: `https://moviedrop.framer.website/m/27205?region=US`
 
-### Common Issues
+## 🛠️ Technical Details
 
-1. **"Movie not found" errors**:
-   - Check TMDB_API_KEY is set correctly
-   - Verify the movie ID exists in TMDB
+- **Frontend**: Vanilla HTML/CSS/JavaScript
+- **Backend**: Express.js for routing
+- **API**: TMDB API for movie data and streaming providers
+- **Deployment**: Vercel (serverless functions)
 
-2. **Universal links not working**:
-   - Ensure apple-app-site-association file is accessible
-   - Check Associated Domains capability is added to iOS app
-   - Verify Team ID matches in the association file
+## 🎯 Next Steps
 
-3. **Images not loading**:
-   - Check ATS settings in iOS app
-   - Ensure image.tmdb.org is allowed in Info.plist
+1. **Deploy to Vercel** and get your domain
+2. **Update iOS app** with the new domain
+3. **Test the full flow** from iMessage to landing page
+4. **Customize branding** to match your vision
+5. **Add analytics** to track usage
 
-### Restoration Checklist
-
-If the app is not working, check:
-
-- [ ] TMDB_API_KEY environment variable is set
-- [ ] Backend server is running on port 3000
-- [ ] iOS app has correct base URL (192.168.0.31:3000 for local testing)
-- [ ] ATS exceptions are configured for moviedrop.app and image.tmdb.org
-- [ ] Universal links association file is accessible
-- [ ] Associated Domains capability is added to iOS app
+Your branded movie landing pages are ready to go! 🎬✨
