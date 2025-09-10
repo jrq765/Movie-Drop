@@ -55,6 +55,8 @@
 	<string>https://moviedrop.framer.website</string>
 	<key>MOVIEDROP_DEFAULT_REGION</key>
 	<string>US</string>
+	<key>MOVIEDROP_API_BASE_URL</key>
+	<string>https://moviedrop-backend.vercel.app/api</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSExceptionDomains</key>
@@ -69,6 +71,15 @@
 				<true/>
 			</dict>
 			<key>moviedrop.framer.website</key>
+			<dict>
+				<key>NSExceptionAllowsInsecureHTTPLoads</key>
+				<false/>
+				<key>NSExceptionMinimumTLSVersion</key>
+				<string>TLSv1.2</string>
+				<key>NSIncludesSubdomains</key>
+				<true/>
+			</dict>
+			<key>moviedrop-backend.vercel.app</key>
 			<dict>
 				<key>NSExceptionAllowsInsecureHTTPLoads</key>
 				<false/>

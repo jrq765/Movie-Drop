@@ -1,7 +1,9 @@
 import Foundation
 
 class MovieService: ObservableObject {
-    private let baseURL = "http://192.168.0.31:3000/api"
+    private var baseURL: String {
+        return Bundle.main.object(forInfoDictionaryKey: "MOVIEDROP_API_BASE_URL") as? String ?? "https://moviedrop-backend.vercel.app/api"
+    }
     
     func searchMovies(query: String, completion: @escaping (Result<[Movie], Error>) -> Void) {
         guard let encodedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
