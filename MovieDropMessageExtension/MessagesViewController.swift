@@ -302,21 +302,14 @@ class MessagesViewController: MSMessagesAppViewController {
             guard let self else { return }
             let poster = await ImageLoader.fetchDownsampled(card.posterURL, maxPixel: 1024)
             
-            guard let messagesVC = sequence(first: self.parent, next: { $0?.parent })
-                    .first(where: { $0 is MSMessagesAppViewController }) as? MSMessagesAppViewController
-            else {
-                self.isInserting = false
-                MDLog.error("MSMessagesAppViewController not found")
-                return
-            }
-            
+            // Use self directly since we're already in MSMessagesAppViewController
             guard let message = MessageComposer.makeMessage(card: card, poster: poster, universalBaseURL: universalBaseURL, region: currentRegion) else {
                 self.isInserting = false
                 MDLog.error("Failed to compose message")
                 return
             }
             
-            guard let convo = messagesVC.activeConversation else {
+            guard let convo = self.activeConversation else {
                 self.isInserting = false
                 MDLog.error("activeConversation is nil")
                 return
@@ -330,7 +323,7 @@ class MessagesViewController: MSMessagesAppViewController {
                     // Fallback: at least insert text so user can share something
                     convo.insertText("MovieDrop: \(card.title)", completionHandler: nil)
                 } else {
-                    messagesVC.requestPresentationStyle(.compact) // show Send button immediately
+                    self.requestPresentationStyle(.compact) // show Send button immediately
                 }
             }
         }
