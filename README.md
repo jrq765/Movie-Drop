@@ -5,9 +5,10 @@ Share movies instantly with friends in text messages. Instead of sending clunky 
 ## Features
 
 - **Smart Movie Search**: Find any movie instantly with TMDB API integration
-- **iMessage Integration**: Share movie cards directly in iMessage, WhatsApp, and other messaging apps
-- **Streaming Availability**: See exactly where to watch, rent, or buy with real-time availability data
-- **One-Tap Access**: Direct links to streaming platforms for instant viewing
+- **iMessage Integration**: Share movie cards directly in iMessage with one-tap insertion
+- **Real Streaming Data**: See exactly where to watch, rent, or buy with live TMDB provider data
+- **Universal Links**: Framer-powered landing pages with region-specific provider links
+- **Direct Provider Access**: One-tap links to streaming platforms (when resolvable)
 - **Affiliate Monetization**: Earn commissions from streaming platform referrals
 
 ## Tech Stack
@@ -124,6 +125,72 @@ The API will be available at `http://localhost:3000`
 
 The web app will be available at `http://localhost:8000`
 
+## Testing the Implementation
+
+### Quick Tests
+
+1. **iMessage Sharing Test**:
+   - Open iMessage and tap the MovieDrop extension
+   - Search for any movie (e.g., "Inception")
+   - Tap a movie → exactly one bubble should insert
+   - Tap Send to share the message
+
+2. **Universal Link Test**:
+   - On recipient device (no app installed), tap the shared bubble
+   - Should open: `https://moviedrop.framer.website/m/{tmdbId}?region=US`
+   - Page should show movie details and real provider data
+
+3. **Provider Link Test**:
+   - On the Framer page, click any provider chip
+   - Should open the provider's movie page (when resolvable)
+   - Or fall back to TMDB region page
+
+### Backend API Test
+
+Test the streaming API with a real movie:
+
+```bash
+# Test with a popular movie (Inception - TMDB ID: 27205)
+curl "http://localhost:3000/api/streaming/27205?region=US"
+
+# Expected response:
+{
+  "region": "US",
+  "movieId": 27205,
+  "movieTitle": "Inception",
+  "movieYear": 2010,
+  "link": "https://www.justwatch.com/us/movie/inception",
+  "providers": [
+    {
+      "id": 8,
+      "name": "Netflix",
+      "logo_path": "/t2yyOv40HZeVlLjYsCsPHnWLk4W.jpg",
+      "kinds": ["flatrate"],
+      "url": "https://www.justwatch.com/us/movie/inception",
+      "isDirectLink": false
+    }
+  ]
+}
+```
+
+### Restoration Checklist
+
+If something fails, check these:
+
+**iOS ATS Issues**:
+- Add domain-specific ATS exception for `moviedrop.framer.website` in Info.plist
+- Ensure `image.tmdb.org` is allowed for poster loading
+
+**Missing TMDB Key**:
+- Get API key from https://www.themoviedb.org/settings/api
+- Add `TMDB_API_KEY=your_actual_key` to `backend/.env`
+- Restart backend server
+
+**Framer Issues**:
+- Ensure `/m/[id]` route exists on Framer
+- Verify site is published at `moviedrop.framer.website`
+- Test universal link manually in browser
+
 ## API Endpoints
 
 ### Movies
@@ -174,7 +241,9 @@ The web app will be available at `http://localhost:8000`
 - [x] TMDB integration
 
 ### Phase 2
-- [ ] JustWatch API integration for real streaming data
+- [x] Real TMDB streaming provider data integration
+- [x] Universal links with Framer landing pages
+- [x] Direct provider link resolution
 - [ ] User accounts and watch history
 - [ ] Push notifications for new releases
 - [ ] Enhanced movie card designs

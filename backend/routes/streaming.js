@@ -1,81 +1,13 @@
 const express = require('express');
 const axios = require('axios');
 const router = express.Router();
-
-// Mock streaming data - in production, integrate with JustWatch API or similar
-const MOCK_STREAMING_DATA = {
-    // Netflix
-    'netflix': {
-        name: 'Netflix',
-        logo: 'https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg',
-        affiliateUrl: 'https://netflix.com',
-        type: 'subscription'
-    },
-    // Amazon Prime Video
-    'amazon': {
-        name: 'Amazon Prime Video',
-        logo: 'https://upload.wikimedia.org/wikipedia/commons/1/11/Amazon_Prime_Video_logo.svg',
-        affiliateUrl: 'https://amazon.com',
-        type: 'subscription'
-    },
-    // Apple TV
-    'apple': {
-        name: 'Apple TV',
-        logo: 'https://upload.wikimedia.org/wikipedia/commons/4/4e/Apple_TV_Plus_logo.svg',
-        affiliateUrl: 'https://tv.apple.com',
-        type: 'rent'
-    },
-    // YouTube Movies
-    'youtube': {
-        name: 'YouTube Movies',
-        logo: 'https://upload.wikimedia.org/wikipedia/commons/0/09/YouTube_full-color_icon_%282017%29.svg',
-        affiliateUrl: 'https://youtube.com',
-        type: 'rent'
-    },
-    // Hulu
-    'hulu': {
-        name: 'Hulu',
-        logo: 'https://upload.wikimedia.org/wikipedia/commons/e/e4/Hulu_Logo.svg',
-        affiliateUrl: 'https://hulu.com',
-        type: 'subscription'
-    },
-    // Disney+
-    'disney': {
-        name: 'Disney+',
-        logo: 'https://upload.wikimedia.org/wikipedia/commons/7/77/Disney_Plus_logo.svg',
-        affiliateUrl: 'https://disneyplus.com',
-        type: 'subscription'
-    }
-};
-
-// Get supported streaming platforms
-router.get('/platforms', (req, res) => {
-    try {
-        const platforms = Object.values(MOCK_STREAMING_DATA).map(platform => ({
-            id: Object.keys(MOCK_STREAMING_DATA).find(key => MOCK_STREAMING_DATA[key] === platform),
-            name: platform.name,
-            logo: platform.logo,
-            type: platform.type
-        }));
-
-        res.json({
-            platforms,
-            totalCount: platforms.length
-        });
-
-    } catch (error) {
-        console.error('Platforms error:', error);
-        res.status(500).json({
-            error: 'Failed to fetch platforms',
-            message: error.message
-        });
-    }
-});
+const { resolveProviderLink, getProviderInfo } = require('./linkResolver');
 
 // Get streaming availability for a movie
 router.get('/:movieId', async (req, res) => {
     try {
         const { movieId } = req.params;
+        const region = req.query.region || process.env.REGION_DEFAULT || 'US';
         
         if (!movieId || isNaN(movieId)) {
             return res.status(400).json({
@@ -83,23 +15,137 @@ router.get('/:movieId', async (req, res) => {
             });
         }
 
-        // In production, this would query JustWatch API or similar service
-        // For now, return mock data based on movie ID
-        const streamingOptions = getMockStreamingOptions(movieId);
+        // Check if TMDB API key is configured
+        const tmdbApiKey = process.env.TMDB_API_KEY;
+        if (!tmdbApiKey || tmdbApiKey === 'your_tmdb_api_key_here') {
+            return res.status(500).json({
+                error: 'TMDB API key not configured',
+                message: 'Please set TMDB_API_KEY in your environment variables',
+                restorationChecklist: [
+                    '1. Get TMDB API key from https://www.themoviedb.org/settings/api',
+                    '2. Add TMDB_API_KEY=your_actual_key to backend/.env',
+                    '3. Restart the backend server'
+                ]
+            });
+        }
+
+        // Fetch movie details and watch providers from TMDB
+        const [movieResponse, providersResponse] = await Promise.all([
+            axios.get(`https://api.themoviedb.org/3/movie/${movieId}`, {
+                params: { api_key: tmdbApiKey }
+            }),
+            axios.get(`https://api.themoviedb.org/3/movie/${movieId}/watch/providers`, {
+                params: { api_key: tmdbApiKey }
+            })
+        ]);
+
+        const movie = movieResponse.data;
+        const providers = providersResponse.data;
+
+        // Extract region-specific providers
+        const regionProviders = providers.results[region];
+        if (!regionProviders) {
+            return res.json({
+                region,
+                movieId: parseInt(movieId),
+                movieTitle: movie.title,
+                movieYear: movie.release_date ? new Date(movie.release_date).getFullYear() : null,
+                link: null,
+                providers: [],
+                message: `No streaming providers found for region: ${region}`
+            });
+        }
+
+        // Build available providers array
+        const availableProviders = [];
+        const providerTypes = [
+            { array: regionProviders.flatrate, kind: 'flatrate' },
+            { array: regionProviders.buy, kind: 'buy' },
+            { array: regionProviders.rent, kind: 'rent' }
+        ];
+
+        for (const type of providerTypes) {
+            if (type.array) {
+                for (const provider of type.array) {
+                    // Check if provider already exists (deduplicate)
+                    const existingIndex = availableProviders.findIndex(p => p.id === provider.provider_id);
+                    if (existingIndex >= 0) {
+                        // Update existing provider to include multiple types
+                        if (!availableProviders[existingIndex].kinds.includes(type.kind)) {
+                            availableProviders[existingIndex].kinds.push(type.kind);
+                        }
+                    } else {
+                        // Resolve direct provider link
+                        const directUrl = await resolveProviderLink({
+                            title: movie.title,
+                            year: movie.release_date ? new Date(movie.release_date).getFullYear() : null,
+                            tmdbId: movieId,
+                            region: region,
+                            providerId: provider.provider_id
+                        });
+
+                        // Get provider info
+                        const providerInfo = getProviderInfo(provider.provider_id);
+
+                        availableProviders.push({
+                            id: provider.provider_id,
+                            name: provider.provider_name,
+                            logo_path: provider.logo_path,
+                            kinds: [type.kind],
+                            url: directUrl || regionProviders.link, // Fallback to TMDB region page
+                            isDirectLink: !!directUrl
+                        });
+                    }
+                }
+            }
+        }
 
         res.json({
+            region,
             movieId: parseInt(movieId),
-            streamingOptions,
+            movieTitle: movie.title,
+            movieYear: movie.release_date ? new Date(movie.release_date).getFullYear() : null,
+            link: regionProviders.link, // TMDB/JustWatch region page fallback
+            providers: availableProviders,
             lastUpdated: new Date().toISOString()
         });
 
     } catch (error) {
         console.error('Streaming availability error:', error);
+        
+        if (error.response?.status === 401) {
+            return res.status(500).json({
+                error: 'TMDB API authentication failed',
+                message: 'Invalid TMDB API key',
+                restorationChecklist: [
+                    '1. Verify TMDB_API_KEY is correct in backend/.env',
+                    '2. Check if API key has proper permissions',
+                    '3. Restart the backend server'
+                ]
+            });
+        }
+        
+        if (error.response?.status === 404) {
+            return res.status(404).json({
+                error: 'Movie not found',
+                message: `Movie with ID ${req.params.movieId} not found in TMDB`
+            });
+        }
+
         res.status(500).json({
             error: 'Failed to fetch streaming availability',
             message: error.message
         });
     }
+});
+
+// Get supported streaming platforms (deprecated - use real data from TMDB)
+router.get('/platforms', (req, res) => {
+    res.json({
+        platforms: [],
+        totalCount: 0,
+        message: 'Use /api/streaming/:movieId for real provider data from TMDB'
+    });
 });
 
 // Get streaming options for multiple movies
@@ -119,11 +165,22 @@ router.post('/batch', async (req, res) => {
             });
         }
 
-        const results = movieIds.map(movieId => ({
-            movieId: parseInt(movieId),
-            streamingOptions: getMockStreamingOptions(movieId),
-            lastUpdated: new Date().toISOString()
-        }));
+        // Process each movie ID
+        const results = await Promise.all(
+            movieIds.map(async (movieId) => {
+                try {
+                    // Make internal request to single movie endpoint
+                    const response = await axios.get(`http://localhost:${process.env.PORT || 3000}/api/streaming/${movieId}`);
+                    return response.data;
+                } catch (error) {
+                    return {
+                        movieId: parseInt(movieId),
+                        error: error.response?.data?.error || 'Failed to fetch data',
+                        providers: []
+                    };
+                }
+            })
+        );
 
         res.json({
             results,
@@ -170,33 +227,5 @@ router.post('/click', async (req, res) => {
         });
     }
 });
-
-// Helper function to generate mock streaming options
-function getMockStreamingOptions(movieId) {
-    const platforms = Object.keys(MOCK_STREAMING_DATA);
-    const numOptions = Math.floor(Math.random() * 4) + 2; // 2-5 options
-    const selectedPlatforms = platforms.sort(() => 0.5 - Math.random()).slice(0, numOptions);
-    
-    return selectedPlatforms.map(platformKey => {
-        const platform = MOCK_STREAMING_DATA[platformKey];
-        const isRentOrBuy = platform.type === 'rent' || platform.type === 'buy';
-        
-        return {
-            platform: platform.name,
-            platformId: platformKey,
-            type: platform.type,
-            url: platform.affiliateUrl,
-            price: isRentOrBuy ? getRandomPrice() : null,
-            logo: platform.logo,
-            available: true
-        };
-    });
-}
-
-// Helper function to generate random prices
-function getRandomPrice() {
-    const prices = ['$2.99', '$3.99', '$4.99', '$5.99', '$9.99', '$14.99', '$19.99'];
-    return prices[Math.floor(Math.random() * prices.length)];
-}
 
 module.exports = router;

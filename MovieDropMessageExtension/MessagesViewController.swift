@@ -48,9 +48,10 @@ struct MovieCardData {
 }
 
 enum MessageComposer {
-    static func buildURL(base: String, movieId: String) -> URL? {
+    static func buildURL(base: String, movieId: String, region: String = "US") -> URL? {
         var comps = URLComponents(string: base)
         comps?.path = "/m/\(movieId)"
+        comps?.queryItems = [URLQueryItem(name: "region", value: region)]
         return comps?.url
     }
 
@@ -60,7 +61,7 @@ enum MessageComposer {
     }
 
     @MainActor
-    static func makeMessage(card: MovieCardData, poster: UIImage?, universalBaseURL: String) -> MSMessage? {
+    static func makeMessage(card: MovieCardData, poster: UIImage?, universalBaseURL: String, region: String = "US") -> MSMessage? {
         let session = MSSession()
         let layout = MSMessageTemplateLayout()
         layout.image = poster
@@ -72,7 +73,7 @@ enum MessageComposer {
         message.layout = layout
         message.summaryText = "\(card.title)\(layout.imageSubtitle?.isEmpty == false ? " • \(layout.imageSubtitle!)" : "")"
 
-        if let url = buildURL(base: universalBaseURL, movieId: card.id) {
+        if let url = buildURL(base: universalBaseURL, movieId: card.id, region: region) {
             message.url = url
         }
         return message
@@ -309,7 +310,7 @@ class MessagesViewController: MSMessagesAppViewController {
                 return
             }
             
-            guard let message = MessageComposer.makeMessage(card: card, poster: poster, universalBaseURL: universalBaseURL) else {
+            guard let message = MessageComposer.makeMessage(card: card, poster: poster, universalBaseURL: universalBaseURL, region: "US") else {
                 self.isInserting = false
                 MDLog.error("Failed to compose message")
                 return
