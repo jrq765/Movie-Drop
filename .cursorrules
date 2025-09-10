@@ -1,0 +1,111 @@
+# Place this at the repo root as `.cursorrules`
+version: 1
+
+project:
+  name: Movie Drop
+  stack:
+    frontend: ["iOS Swift", "SwiftUI", "UIKit", "iMessage Extension"]
+    backend: ["Node.js", "Express", "PostgreSQL"]
+    infra: ["Vercel (preview + prod)", "Railway/Neon for DB"]
+  constraints:
+    - "NEVER use mock data, seed data, or hard-coded placeholders. Always integrate with the real data source or documented fixtures derived from the real schema."
+    - "Prefer smallest viable change; minimize file churn."
+    - "Maintain Swift strictness: no force unwrapping without proper guards, proper error handling."
+
+workflow:
+  plan_first:
+    - "Before writing code, emit a short PLAN with: Goal, Constraints, Risks, Minimal change set, Files to touch."
+    - "If uncertainty exists, propose 2–3 options and pick the fastest, reversible one."
+  implement:
+    - "Generate only the diffs required to fulfill the plan."
+    - "Reuse existing utilities/components before creating new ones."
+    - "Avoid adding dependencies unless clearly necessary; justify in PLAN."
+  validate:
+    - "Run & fix: typecheck, lint, tests."
+    - "Add/Update unit tests for new logic and an integration test for each endpoint or critical flow."
+    - "Measure impact: bundle size delta (iOS), cold start (api), query count (db) when applicable."
+  document:
+    - "Update README/CHANGELOG if public behavior or env vars change."
+    - "Inline docstrings for non-obvious logic."
+
+non_repetition_protocol:
+  # Prevents Cursor from retrying failed fixes
+  ledger:
+    file: ".cursor/attempts.yml"
+    rules:
+      - "For each bug/issue, write an entry with: id, context, hypothesis, change summary, outcome(pass/fail), and reason."
+      - "Before proposing a fix, check the ledger for similar attempts; if found, do NOT repeat. Instead, explain what will be different and why it should work."
+  backoff:
+    - "Max 2 distinct attempts per issue id. If both fail, stop and request human input with the current state, logs, and diffs."
+  diff_required:
+    - "Every attempt must include a minimal diff and a rationale pointing to root cause evidence (stack trace, test failure, or logs)."
+
+data_rules:
+  hard_ban:
+    - "No mock servers, no `faker`, no JSON stubs, no hard-coded arrays."
+    - "No screenshots-as-data, no pasted payloads from docs."
+  allowed_sources:
+    - "Real DB via backend API with proper authentication."
+    - "Official public APIs with authenticated requests."
+    - "Local dev fixtures generated FROM the real schema and marked `fixtures/realistic/*` with provenance notes."
+  enforcement:
+    - "Fail the task if real data source is unreachable; do not fabricate data. Emit a checklist of steps to restore connectivity."
+
+testing:
+  policy:
+    - "Unit tests: pure logic and data models."
+    - "Integration tests: API calls and network layer."
+    - "UI tests (optional): XCTest for critical user flows."
+  data_in_tests:
+    - "Use factory functions that mirror real API responses. No random/fake content; derive from minimal canonical fixtures."
+
+observability:
+  logging:
+    - "Use structured logs with print statements for debugging. No secrets in logs."
+  errors:
+    - "Surface actionable messages to UI; keep stack traces in console logs."
+  metrics:
+    - "Track API response times and error rates when feasible."
+
+security:
+  secrets:
+    - "All API keys in backend environment variables—never hard-code in iOS app."
+    - "Abort if a secret is missing; return a clear setup checklist."
+  inputs:
+    - "Validate and sanitize all user inputs at API boundary."
+
+performance:
+  ios:
+    - "Use proper memory management and avoid retain cycles."
+    - "Lazy-load images and data; avoid blocking the main thread."
+  api:
+    - "Use proper caching headers and request optimization."
+
+definition_of_done:
+  - "PLAN shown and followed."
+  - "No mock data used anywhere."
+  - "All checks pass: build, lint, tests."
+  - "Non-repetition ledger updated."
+  - "Docs updated if behavior/env changed."
+
+## What & Why
+- Goal:
+- Minimal change set:
+- Linked issue id:
+
+## Evidence of Root Cause
+- Error logs / failing test:
+- Where the defect lived:
+
+## Prior Attempts Check
+- Related entries in `.cursor/attempts.yml`:
+- What is different this time:
+
+## Tests
+- [ ] Unit
+- [ ] Integration
+- [ ] (Optional) UI
+
+## Risk & Rollback
+- Risk:
+- Rollback plan:

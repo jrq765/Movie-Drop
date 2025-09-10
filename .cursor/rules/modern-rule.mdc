@@ -1,0 +1,114 @@
+---
+alwaysApply: true
+---
+# Place this at the repo root as `.cursorrules`
+version: 1
+
+project:
+  name: Movie Drop
+  stack:
+    frontend: ["Next.js 14", "React 18", "TypeScript", "TailwindCSS"]
+    backend: ["Node.js", "Express or Next API routes", "PostgreSQL (Prisma)"]
+    infra: ["Vercel (preview + prod)", "Railway/Neon for DB"]
+  constraints:
+    - "NEVER use mock data, seed data, or hard-coded placeholders. Always integrate with the real data source or documented fixtures derived from the real schema."
+    - "Prefer smallest viable change; minimize file churn."
+    - "Maintain TypeScript strictness: no any, no ts-ignore."
+
+workflow:
+  plan_first:
+    - "Before writing code, emit a short PLAN with: Goal, Constraints, Risks, Minimal change set, Files to touch."
+    - "If uncertainty exists, propose 2–3 options and pick the fastest, reversible one."
+  implement:
+    - "Generate only the diffs required to fulfill the plan."
+    - "Reuse existing utilities/components before creating new ones."
+    - "Avoid adding dependencies unless clearly necessary; justify in PLAN."
+  validate:
+    - "Run & fix: typecheck, lint, tests."
+    - "Add/Update unit tests for new logic and an integration test for each endpoint or critical flow."
+    - "Measure impact: bundle size delta (web), cold start (api), query count (db) when applicable."
+  document:
+    - "Update README/CHANGELOG if public behavior or env vars change."
+    - "Inline docstrings for non-obvious logic."
+
+non_repetition_protocol:
+  # Prevents Cursor from retrying failed fixes
+  ledger:
+    file: ".cursor/attempts.yml"
+    rules:
+      - "For each bug/issue, write an entry with: id, context, hypothesis, change summary, outcome(pass/fail), and reason."
+      - "Before proposing a fix, check the ledger for similar attempts; if found, do NOT repeat. Instead, explain what will be different and why it should work."
+  backoff:
+    - "Max 2 distinct attempts per issue id. If both fail, stop and request human input with the current state, logs, and diffs."
+  diff_required:
+    - "Every attempt must include a minimal diff and a rationale pointing to root cause evidence (stack trace, test failure, or logs)."
+
+data_rules:
+  hard_ban:
+    - "No mock servers, no `faker`, no JSON stubs, no hard-coded arrays."
+    - "No screenshots-as-data, no pasted payloads from docs."
+  allowed_sources:
+    - "Real DB via Prisma with `.env` secrets."
+    - "Official public APIs with authenticated requests."
+    - "Local dev fixtures generated FROM the real schema and marked `fixtures/realistic/*` with provenance notes."
+  enforcement:
+    - "Fail the task if real data source is unreachable; do not fabricate data. Emit a checklist of steps to restore connectivity."
+
+testing:
+  policy:
+    - "Unit tests: pure logic and serializers."
+    - "Integration tests: API routes with test DB."
+    - "E2E (optional): Playwright for user-critical flows."
+  data_in_tests:
+    - "Use factory functions that mirror real schema. No random/fake content; derive from minimal canonical fixtures."
+
+observability:
+  logging:
+    - "Use structured logs (`level`, `msg`, `context`). No secrets."
+  errors:
+    - "Surface actionable messages to UI; keep stack traces server-side."
+  metrics:
+    - "Track latency and error rate for each API route when feasible."
+
+security:
+  secrets:
+    - "All keys in `.env.local` and `.env`—never hard-code."
+    - "Abort if a secret is missing; return a clear setup checklist."
+  inputs:
+    - "Validate and sanitize all user inputs at API boundary using zod/yup."
+
+performance:
+  web:
+    - "Prefer React Server Components and caching where safe."
+    - "Lazy-load non-critical components; avoid layout shifts."
+  db:
+    - "Use indexes for new query patterns; cap N+1 with `include/select` and batching."
+
+definition_of_done:
+  - "PLAN shown and followed."
+  - "No mock data used anywhere."
+  - "All checks pass: type, lint, tests."
+  - "Non-repetition ledger updated."
+  - "Docs updated if behavior/env changed."
+
+## What & Why
+- Goal:
+- Minimal change set:
+- Linked issue id:
+
+## Evidence of Root Cause
+- Error logs / failing test:
+- Where the defect lived:
+
+## Prior Attempts Check
+- Related entries in `.cursor/attempts.yml`:
+- What is different this time:
+
+## Tests
+- [ ] Unit
+- [ ] Integration
+- [ ] (Optional) E2E
+
+## Risk & Rollback
+- Risk:
+- Rollback plan:
