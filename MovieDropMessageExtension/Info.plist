@@ -52,7 +52,7 @@
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>MOVIEDROP_BASE_URL</key>
-	<string>https://moviedrop.framer.website</string>
+	<string>https://www.themoviedb.org</string>
 	<key>MOVIEDROP_DEFAULT_REGION</key>
 	<string>US</string>
 	<key>MOVIEDROP_API_BASE_URL</key>
@@ -89,6 +89,15 @@
 				<true/>
 			</dict>
 			<key>api.themoviedb.org</key>
+			<dict>
+				<key>NSExceptionAllowsInsecureHTTPLoads</key>
+				<false/>
+				<key>NSExceptionMinimumTLSVersion</key>
+				<string>TLSv1.2</string>
+				<key>NSIncludesSubdomains</key>
+				<true/>
+			</dict>
+			<key>www.themoviedb.org</key>
 			<dict>
 				<key>NSExceptionAllowsInsecureHTTPLoads</key>
 				<false/>
