@@ -31,17 +31,8 @@ class MovieService: ObservableObject {
             let tmdbResponse = try JSONDecoder().decode(TMDBMovieResponse.self, from: data)
             print("✅ MovieService: Successfully decoded \(tmdbResponse.results.count) movies")
             
-            // Convert TMDB results to our Movie model
-            let movies = tmdbResponse.results.map { tmdbMovie in
-                Movie(
-                    id: tmdbMovie.id,
-                    title: tmdbMovie.title,
-                    overview: tmdbMovie.overview,
-                    releaseDate: tmdbMovie.releaseDate,
-                    posterPath: tmdbMovie.posterPath,
-                    popularity: tmdbMovie.popularity
-                )
-            }
+            // TMDB results are already Movie objects, no conversion needed
+            let movies = tmdbResponse.results
             
             // Filter out movies without posters and sort by popularity
             let filteredMovies = movies
