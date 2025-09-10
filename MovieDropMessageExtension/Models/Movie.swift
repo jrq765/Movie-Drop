@@ -16,6 +16,23 @@ struct Movie: Identifiable, Codable {
     let popularity: Double?
     let video: Bool?
     
+    enum CodingKeys: String, CodingKey {
+        case id
+        case title
+        case overview
+        case posterPath = "poster_path"
+        case backdropPath = "backdrop_path"
+        case releaseDate = "release_date"
+        case voteAverage = "vote_average"
+        case voteCount = "vote_count"
+        case adult
+        case genreIds = "genre_ids"
+        case originalLanguage = "original_language"
+        case originalTitle = "original_title"
+        case popularity
+        case video
+    }
+    
     var posterURL: URL? {
         guard let posterPath = posterPath else { return nil }
         return URL(string: "https://image.tmdb.org/t/p/w500\(posterPath)")
