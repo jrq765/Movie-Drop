@@ -37,7 +37,7 @@ app.use('/api/analytics', analyticsRoutes);
 app.get('/m/:id', async (req, res) => {
     try {
         const movieId = req.params.id;
-        const region = req.query.region || 'US';
+        const region = req.query.region || process.env.REGION_DEFAULT || 'US';
         
         // Fetch movie data from TMDB
         const movieResponse = await fetch(`https://api.themoviedb.org/3/movie/${movieId}?api_key=${process.env.TMDB_API_KEY}`);

@@ -53,6 +53,8 @@
 	</array>
 	<key>MOVIEDROP_BASE_URL</key>
 	<string>https://moviedrop.framer.website</string>
+	<key>MOVIEDROP_DEFAULT_REGION</key>
+	<string>US</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSExceptionDomains</key>

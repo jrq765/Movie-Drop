@@ -24,7 +24,7 @@ router.get('/search', async (req, res) => {
                 query: query.trim(),
                 page: parseInt(page),
                 include_adult: false,
-                language: 'en-US'
+                language: req.query.language || 'en-US'
             }
         });
 
@@ -82,7 +82,7 @@ router.get('/:id', async (req, res) => {
         const response = await axios.get(`${TMDB_BASE_URL}/movie/${id}`, {
             params: {
                 api_key: TMDB_API_KEY,
-                language: 'en-US',
+                language: req.query.language || 'en-US',
                 append_to_response: 'videos,credits'
             }
         });
@@ -134,7 +134,7 @@ router.post('/:id/card', async (req, res) => {
         const movieResponse = await axios.get(`${TMDB_BASE_URL}/movie/${id}`, {
             params: {
                 api_key: TMDB_API_KEY,
-                language: 'en-US'
+                language: req.query.language || 'en-US'
             }
         });
 
@@ -193,7 +193,7 @@ router.get('/popular', async (req, res) => {
             params: {
                 api_key: TMDB_API_KEY,
                 page: parseInt(page),
-                language: 'en-US'
+                language: req.query.language || 'en-US'
             }
         });
 
@@ -239,7 +239,7 @@ router.get('/trending', async (req, res) => {
             params: {
                 api_key: TMDB_API_KEY,
                 page: parseInt(page),
-                language: 'en-US'
+                language: req.query.language || 'en-US'
             }
         });
 

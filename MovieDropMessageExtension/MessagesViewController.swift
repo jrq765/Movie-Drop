@@ -48,7 +48,7 @@ struct MovieCardData {
 }
 
 enum MessageComposer {
-    static func buildURL(base: String, movieId: String, region: String = "US") -> URL? {
+    static func buildURL(base: String, movieId: String, region: String) -> URL? {
         var comps = URLComponents(string: base)
         comps?.path = "/m/\(movieId)"
         comps?.queryItems = [URLQueryItem(name: "region", value: region)]
@@ -61,7 +61,7 @@ enum MessageComposer {
     }
 
     @MainActor
-    static func makeMessage(card: MovieCardData, poster: UIImage?, universalBaseURL: String, region: String = "US") -> MSMessage? {
+    static func makeMessage(card: MovieCardData, poster: UIImage?, universalBaseURL: String, region: String) -> MSMessage? {
         let session = MSSession()
         let layout = MSMessageTemplateLayout()
         layout.image = poster
@@ -83,6 +83,21 @@ enum MessageComposer {
 // MARK: - Properties
 private var universalBaseURL: String {
     return Bundle.main.object(forInfoDictionaryKey: "MOVIEDROP_BASE_URL") as? String ?? "https://moviedrop.app"
+}
+
+private var currentRegion: String {
+    // Get device's current region from locale
+    let locale = Locale.current
+    let regionCode = locale.region?.identifier ?? "US"
+    
+    // Map common region codes to TMDB-supported regions
+    let regionMapping: [String: String] = [
+        "US": "US", "CA": "CA", "GB": "GB", "AU": "AU", "DE": "DE", 
+        "FR": "FR", "ES": "ES", "IT": "IT", "JP": "JP", "KR": "KR",
+        "BR": "BR", "MX": "MX", "IN": "IN", "CN": "CN", "RU": "RU"
+    ]
+    
+    return regionMapping[regionCode] ?? Bundle.main.object(forInfoDictionaryKey: "MOVIEDROP_DEFAULT_REGION") as? String ?? "US"
 }
 
 class MessagesViewController: MSMessagesAppViewController {
@@ -310,7 +325,7 @@ class MessagesViewController: MSMessagesAppViewController {
                 return
             }
             
-            guard let message = MessageComposer.makeMessage(card: card, poster: poster, universalBaseURL: universalBaseURL, region: "US") else {
+            guard let message = MessageComposer.makeMessage(card: card, poster: poster, universalBaseURL: universalBaseURL, region: currentRegion) else {
                 self.isInserting = false
                 MDLog.error("Failed to compose message")
                 return
