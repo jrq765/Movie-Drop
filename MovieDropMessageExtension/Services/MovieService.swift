@@ -43,11 +43,23 @@ class MovieService: ObservableObject {
                 let tmdbResponse = try JSONDecoder().decode(TMDBMovieResponse.self, from: data)
                 print("✅ Found \(tmdbResponse.results.count) movies")
                 
+                // Debug: Print all movies and their poster paths
+                print("🔍 All movies from TMDB:")
+                for movie in tmdbResponse.results {
+                    print("  - \(movie.title): poster='\(movie.posterPath ?? "nil")'")
+                }
+                
                 // Filter out movies without posters and sort by popularity
                 let filteredMovies = tmdbResponse.results
                     .filter { movie in
-                        guard let posterPath = movie.posterPath, !posterPath.isEmpty else {
-                            print("🚫 Filtering out movie '\(movie.title)' - no poster")
+                        // Be more lenient - only filter out if posterPath is explicitly null/empty
+                        if let posterPath = movie.posterPath {
+                            if posterPath.isEmpty || posterPath == "null" {
+                                print("🚫 Filtering out movie '\(movie.title)' - empty poster path: '\(posterPath)'")
+                                return false
+                            }
+                        } else {
+                            print("🚫 Filtering out movie '\(movie.title)' - no poster path")
                             return false
                         }
                         return true

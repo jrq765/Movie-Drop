@@ -34,11 +34,23 @@ class MovieService: ObservableObject {
             // TMDB results are already Movie objects, no conversion needed
             let movies = tmdbResponse.results
             
+            // Debug: Print all movies and their poster paths
+            print("🔍 All movies from TMDB:")
+            for movie in movies {
+                print("  - \(movie.title): poster='\(movie.posterPath ?? "nil")'")
+            }
+            
             // Filter out movies without posters and sort by popularity
             let filteredMovies = movies
                 .filter { movie in
-                    guard let posterPath = movie.posterPath, !posterPath.isEmpty else {
-                        print("🚫 MovieService: Filtering out movie '\(movie.title)' - no poster")
+                    // Be more lenient - only filter out if posterPath is explicitly null/empty
+                    if let posterPath = movie.posterPath {
+                        if posterPath.isEmpty || posterPath == "null" {
+                            print("🚫 MovieService: Filtering out movie '\(movie.title)' - empty poster path: '\(posterPath)'")
+                            return false
+                        }
+                    } else {
+                        print("🚫 MovieService: Filtering out movie '\(movie.title)' - no poster path")
                         return false
                     }
                     return true
