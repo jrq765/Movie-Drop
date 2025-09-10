@@ -88,12 +88,14 @@
 				<key>NSIncludesSubdomains</key>
 				<true/>
 			</dict>
-			<key>192.168.0.31</key>
+			<key>api.themoviedb.org</key>
 			<dict>
 				<key>NSExceptionAllowsInsecureHTTPLoads</key>
-				<true/>
+				<false/>
 				<key>NSExceptionMinimumTLSVersion</key>
-				<string>TLSv1.0</string>
+				<string>TLSv1.2</string>
+				<key>NSIncludesSubdomains</key>
+				<true/>
 			</dict>
 		</dict>
 	</dict>
