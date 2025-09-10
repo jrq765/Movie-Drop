@@ -272,24 +272,9 @@ class MessagesViewController: MSMessagesAppViewController {
         print("🎬 Creating movie card for: \(movie.title)")
         print("🎬 Movie ID: \(movie.id)")
         print("🎬 Movie poster path: \(movie.posterPath ?? "nil")")
-        print("🎬 About to call movieService.createMovieCard...")
         
-        movieService.createMovieCard(movie: movie) { [weak self] result in
-            print("🎬 MovieService.createMovieCard callback received")
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let movieCard):
-                    print("✅ Movie card created successfully for: \(movieCard.movie.title)")
-                    print("✅ Streaming info count: \(movieCard.streamingInfo.count)")
-                    print("✅ Share URL: \(movieCard.shareURL)")
-                    print("🎬 About to call sendMovieCard...")
-                    self?.sendMovieCard(movieCard)
-                case .failure(let error):
-                    print("❌ Error creating movie card: \(error)")
-                    print("❌ Error details: \(error.localizedDescription)")
-                }
-            }
-        }
+        // Use the direct message creation instead of the complex backend flow
+        handleMovieSelection(movie)
     }
     
     // MARK: - Movie Selection Handling
@@ -351,136 +336,6 @@ class MessagesViewController: MSMessagesAppViewController {
         }
     }
     
-    private func sendMovieCard(_ movieCard: MovieCard) {
-        print("🎬 sendMovieCard called for: \(movieCard.movie.title)")
-        print("🎬 Active conversation: \(activeConversation != nil ? "Available" : "Nil")")
-        print("🎬 Presentation style: \(presentationStyle.rawValue)")
-        
-        // Ensure we're in the right presentation style
-        requestPresentationStyle(.compact)
-        
-        let message = MSMessage()
-        
-        // Create a rich message that will use cellular/WiFi instead of satellite
-        // Create a URL for the movie card
-        var components = URLComponents()
-        components.scheme = "https"
-        components.host = "moviedrop.app"
-        components.path = "/movie/\(movieCard.movie.id)"
-        message.url = components.url
-        
-        // Create a layout for the message
-        let layout = MSMessageTemplateLayout()
-        layout.image = createMovieCardImage(movieCard)
-        layout.caption = "I recommend you watch this!"
-        
-        let movieTitle = movieCard.movie.title
-        let streamingInfo = movieCard.streamingInfo.isEmpty ? "Streaming info coming soon!" : 
-            movieCard.streamingInfo.prefix(3).map { $0.platform }.joined(separator: ", ")
-        
-        layout.subcaption = "🎬 \(movieTitle) - Available on: \(streamingInfo)"
-        message.layout = layout
-        message.summaryText = "🎬 \(movieTitle)"
-        
-        print("🎬 Sending rich movie card for: \(movieCard.movie.title)")
-        print("🎬 Streaming platforms: \(movieCard.streamingInfo.map { $0.platform })")
-        print("🎬 Message URL: \(message.url?.absoluteString ?? "nil")")
-        print("🎬 Message layout: \(layout)")
-        print("🎬 Message summary: \(message.summaryText ?? "nil")")
-        
-        // Send the message
-        guard let conversation = activeConversation else {
-            print("❌ No active conversation available")
-            // Try to get the conversation again after a short delay
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                if let conversation = self.activeConversation {
-                    print("🎬 Got conversation on retry, sending message...")
-                    conversation.insert(message) { error in
-                        if let error = error {
-                            print("❌ Error sending message on retry: \(error)")
-                        } else {
-                            print("✅ Movie card sent successfully on retry!")
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                                self.dismiss()
-                            }
-                        }
-                    }
-                } else {
-                    print("❌ Still no active conversation after retry")
-                }
-            }
-            return
-        }
-        
-        print("🎬 Inserting message into conversation...")
-        conversation.insert(message) { error in
-            DispatchQueue.main.async {
-            if let error = error {
-                    print("❌ Error sending message: \(error)")
-                    print("❌ Error details: \(error.localizedDescription)")
-            } else {
-                    print("✅ Movie card sent successfully!")
-                    // Don't dismiss immediately - let the user see the message was sent
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                self.dismiss()
-                    }
-                }
-            }
-        }
-    }
-    
-    private func createMovieCardImage(_ movieCard: MovieCard) -> UIImage? {
-        // Create a custom image for the movie card
-        let size = CGSize(width: 300, height: 200)
-        let renderer = UIGraphicsImageRenderer(size: size)
-        
-        return renderer.image { context in
-            // Background with gradient
-            let colors = [UIColor.systemBlue.cgColor, UIColor.systemPurple.cgColor]
-            let gradient = CGGradient(colorsSpace: CGColorSpaceCreateDeviceRGB(), colors: colors as CFArray, locations: [0.0, 1.0])!
-            context.cgContext.drawLinearGradient(gradient, start: CGPoint(x: 0, y: 0), end: CGPoint(x: size.width, y: size.height), options: [])
-            
-            // Movie poster placeholder
-            let posterRect = CGRect(x: 10, y: 10, width: 80, height: 120)
-            UIColor.white.withAlphaComponent(0.3).setFill()
-            context.cgContext.fill(posterRect)
-            
-            // Movie poster icon (film strip)
-            let posterIconRect = CGRect(x: 30, y: 50, width: 40, height: 40)
-            UIColor.white.setFill()
-            context.cgContext.fillEllipse(in: posterIconRect)
-            
-            // Movie title
-            let titleRect = CGRect(x: 100, y: 20, width: 190, height: 30)
-            let titleAttributes: [NSAttributedString.Key: Any] = [
-                .font: UIFont.boldSystemFont(ofSize: 18),
-                .foregroundColor: UIColor.white
-            ]
-            movieCard.movie.title.draw(in: titleRect, withAttributes: titleAttributes)
-            
-            // Recommendation text
-            let recommendationRect = CGRect(x: 100, y: 50, width: 190, height: 20)
-            let recommendationAttributes: [NSAttributedString.Key: Any] = [
-                .font: UIFont.systemFont(ofSize: 12),
-                .foregroundColor: UIColor.white.withAlphaComponent(0.9)
-            ]
-            "I recommend you watch this!".draw(in: recommendationRect, withAttributes: recommendationAttributes)
-            
-            // Streaming platforms
-            let platformsText = movieCard.streamingInfo.isEmpty ? "Streaming info unavailable" : movieCard.streamingInfo.map { $0.platform }.joined(separator: ", ")
-            let platformsRect = CGRect(x: 100, y: 80, width: 190, height: 40)
-            let platformsAttributes: [NSAttributedString.Key: Any] = [
-                .font: UIFont.systemFont(ofSize: 14),
-                .foregroundColor: UIColor.white.withAlphaComponent(0.8)
-            ]
-            platformsText.draw(in: platformsRect, withAttributes: platformsAttributes)
-            
-            // Add a subtle border
-            context.cgContext.setStrokeColor(UIColor.white.withAlphaComponent(0.5).cgColor)
-            context.cgContext.setLineWidth(2)
-            context.cgContext.stroke(CGRect(origin: .zero, size: size))
-        }
-    }
 }
 
 // MARK: - UISearchBarDelegate
