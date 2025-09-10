@@ -59,7 +59,7 @@
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>MOVIEDROP_API_BASE_URL</key>
-	<string>https://moviedrop-backend.vercel.app/api</string>
+	<string>https://api.themoviedb.org/3</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>

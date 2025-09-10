@@ -53,6 +53,20 @@ struct BackendMovieResponse: Codable {
     let totalResults: Int
 }
 
+struct TMDBMovieResponse: Codable {
+    let page: Int
+    let results: [Movie]
+    let totalPages: Int
+    let totalResults: Int
+    
+    enum CodingKeys: String, CodingKey {
+        case page
+        case results
+        case totalPages = "total_pages"
+        case totalResults = "total_results"
+    }
+}
+
 struct StreamingInfo: Codable {
     let platform: String
     let type: StreamingType

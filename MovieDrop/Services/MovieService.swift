@@ -8,8 +8,10 @@ class MovieService: ObservableObject {
     func searchMovies(query: String) async throws -> [Movie] {
         print("🔍 MovieService: Starting search for '\(query)'")
         
+        // Use TMDB API directly
+        let tmdbApiKey = "your_tmdb_api_key_here" // You'll need to add your actual TMDB API key
         guard let encodedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
-              let url = URL(string: "\(baseURL)/movies/search?query=\(encodedQuery)") else {
+              let url = URL(string: "https://api.themoviedb.org/3/search/movie?api_key=\(tmdbApiKey)&query=\(encodedQuery)&language=en-US") else {
             print("❌ MovieService: Invalid URL")
             throw MovieServiceError.invalidURL
         }
@@ -18,8 +20,6 @@ class MovieService: ObservableObject {
         
         var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 30)
         request.setValue("application/json", forHTTPHeaderField: "Accept")
-        request.setValue("no-cache", forHTTPHeaderField: "Cache-Control")
-        request.setValue("no-cache", forHTTPHeaderField: "Pragma")
         
         do {
             let (data, response) = try await URLSession.shared.data(for: request)
@@ -28,11 +28,23 @@ class MovieService: ObservableObject {
                 print("📡 MovieService: HTTP Status: \(httpResponse.statusCode)")
             }
             
-            let backendResponse = try JSONDecoder().decode(BackendMovieResponse.self, from: data)
-            print("✅ MovieService: Successfully decoded \(backendResponse.movies.count) movies")
+            let tmdbResponse = try JSONDecoder().decode(TMDBMovieResponse.self, from: data)
+            print("✅ MovieService: Successfully decoded \(tmdbResponse.results.count) movies")
+            
+            // Convert TMDB results to our Movie model
+            let movies = tmdbResponse.results.map { tmdbMovie in
+                Movie(
+                    id: tmdbMovie.id,
+                    title: tmdbMovie.title,
+                    overview: tmdbMovie.overview,
+                    releaseDate: tmdbMovie.releaseDate,
+                    posterPath: tmdbMovie.posterPath,
+                    popularity: tmdbMovie.popularity
+                )
+            }
             
             // Filter out movies without posters and sort by popularity
-            let filteredMovies = backendResponse.movies
+            let filteredMovies = movies
                 .filter { movie in
                     guard let posterPath = movie.posterPath, !posterPath.isEmpty else {
                         print("🚫 MovieService: Filtering out movie '\(movie.title)' - no poster")

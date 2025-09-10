@@ -6,8 +6,10 @@ class MovieService: ObservableObject {
     }
     
     func searchMovies(query: String, completion: @escaping (Result<[Movie], Error>) -> Void) {
+        // Use TMDB API directly
+        let tmdbApiKey = "your_tmdb_api_key_here" // You'll need to add your actual TMDB API key
         guard let encodedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
-              let url = URL(string: "\(baseURL)/movies/search?query=\(encodedQuery)") else {
+              let url = URL(string: "https://api.themoviedb.org/3/search/movie?api_key=\(tmdbApiKey)&query=\(encodedQuery)&language=en-US") else {
             print("❌ Invalid URL for query: \(query)")
             completion(.failure(MovieServiceError.invalidURL))
             return
@@ -38,11 +40,11 @@ class MovieService: ObservableObject {
             }
             
             do {
-                let backendResponse = try JSONDecoder().decode(BackendMovieResponse.self, from: data)
-                print("✅ Found \(backendResponse.movies.count) movies")
+                let tmdbResponse = try JSONDecoder().decode(TMDBMovieResponse.self, from: data)
+                print("✅ Found \(tmdbResponse.results.count) movies")
                 
                 // Filter out movies without posters and sort by popularity
-                let filteredMovies = backendResponse.movies
+                let filteredMovies = tmdbResponse.results
                     .filter { movie in
                         guard let posterPath = movie.posterPath, !posterPath.isEmpty else {
                             print("🚫 Filtering out movie '\(movie.title)' - no poster")
