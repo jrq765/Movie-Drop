@@ -52,11 +52,13 @@
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>MOVIEDROP_BASE_URL</key>
-	<string>https://moviedrop.framer.website</string>
+	<string>https://moviedrop.app</string>
 	<key>MOVIEDROP_DEFAULT_REGION</key>
 	<string>US</string>
 	<key>MOVIEDROP_API_BASE_URL</key>
-	<string>https://api.themoviedb.org/3</string>
+	<string>https://moviedrop.app/api</string>
+	<key>TMDB_API_KEY</key>
+	<string>a5caa7704f1fa4866a6936d8733d1c11</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSExceptionDomains</key>
@@ -79,7 +81,7 @@
 				<key>NSIncludesSubdomains</key>
 				<true/>
 			</dict>
-			<key>moviedrop-backend.vercel.app</key>
+			<key>moviedrop.app</key>
 			<dict>
 				<key>NSExceptionAllowsInsecureHTTPLoads</key>
 				<false/>

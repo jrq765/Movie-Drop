@@ -60,6 +60,8 @@
 	</array>
 	<key>MOVIEDROP_API_BASE_URL</key>
 	<string>https://api.themoviedb.org/3</string>
+	<key>TMDB_API_KEY</key>
+	<string>a5caa7704f1fa4866a6936d8733d1c11</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>
