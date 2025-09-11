@@ -1,21 +1,25 @@
-const TMDB_KEY = process.env.TMDB_API_KEY;
-const REGION_DEFAULT = (process.env.REGION_DEFAULT || 'US').toUpperCase();
-const CORS_ALLOW_ORIGIN = process.env.CORS_ALLOW_ORIGIN || 'https://moviedrop.app';
-
-function setCORS(res) {
-  res.setHeader('Access-Control-Allow-Origin', CORS_ALLOW_ORIGIN);
+export default async function handler(req, res) {
+  // Set CORS headers
+  res.setHeader('Access-Control-Allow-Origin', 'https://moviedrop.app');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-}
+  
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  
+  if (req.method !== 'GET') {
+    return res.status(405).json({ error: 'Method Not Allowed' });
+  }
 
-export default async function handler(req, res) {
-  setCORS(res);
-  if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method !== 'GET') return res.status(405).send('Method Not Allowed');
+  const { id } = req.query;
+  const region = req.query.region || 'US';
+  
+  if (!id) {
+    return res.status(400).json({ error: 'Missing movie id' });
+  }
 
-  const id = Array.isArray(req.query.id) ? req.query.id[0] : req.query.id;
-  if (!id) return res.status(400).json({ error: 'Missing movie id' });
-
+  const TMDB_KEY = process.env.TMDB_API_KEY;
   if (!TMDB_KEY) {
     return res.status(500).json({
       error: 'Missing TMDB_API_KEY',
@@ -26,52 +30,58 @@ export default async function handler(req, res) {
     });
   }
 
-  const region = (req.query.region || REGION_DEFAULT).toUpperCase();
+  try {
+    // Fetch watch/providers for the movie
+    const url = `https://api.themoviedb.org/3/movie/${id}/watch/providers?api_key=${TMDB_KEY}`;
+    const response = await fetch(url);
+    
+    if (!response.ok) {
+      return res.status(response.status).json({ error: 'TMDB providers fetch failed' });
+    }
+    
+    const data = await response.json();
+    const regionData = data?.results?.[region.toUpperCase()];
+    const tmdbRegionLink = regionData?.link || `https://www.themoviedb.org/movie/${id}/watch?locale=${region}`;
 
-  // Fetch watch/providers for the movie
-  const url = new URL(`https://api.themoviedb.org/3/movie/${id}/watch/providers`);
-  url.searchParams.set('api_key', TMDB_KEY);
-
-  const resp = await fetch(url.toString(), { headers: { 'Accept': 'application/json' } });
-  if (!resp.ok) {
-    return res.status(resp.status).json({ error: 'TMDB providers fetch failed' });
-  }
-  const data = await resp.json();
-
-  const regionData = data?.results?.[region];
-  const tmdbRegionLink =
-    regionData?.link || `https://www.themoviedb.org/movie/${id}/watch?locale=${region}`;
-
-  if (!regionData) {
-    return res.status(200).json({ region, link: tmdbRegionLink, providers: [] });
-  }
-
-  // Only providers that TMDB says are available, grouped by kind
-  const kinds = ['flatrate', 'rent', 'buy'];
-
-  const providers = [];
-
-  for (const kind of kinds) {
-    const arr = regionData[kind] || [];
-    for (const p of arr) {
-      providers.push({
-        id: p.provider_id,
-        name: p.provider_name,
-        logo_path: p.logo_path,
-        kind,
-        // Direct deep links differ by provider and often require private catalogs.
-        // For now, safely fall back to the TMDB/JustWatch region page.
-        url: tmdbRegionLink
+    if (!regionData) {
+      return res.status(200).json({ 
+        region: region.toUpperCase(), 
+        link: tmdbRegionLink, 
+        providers: [] 
       });
     }
+
+    // Extract providers by type
+    const kinds = ['flatrate', 'rent', 'buy'];
+    const providers = [];
+
+    for (const kind of kinds) {
+      const arr = regionData[kind] || [];
+      for (const p of arr) {
+        providers.push({
+          id: p.provider_id,
+          name: p.provider_name,
+          logo_path: p.logo_path,
+          kind,
+          url: tmdbRegionLink
+        });
+      }
+    }
+
+    // Dedupe by provider id + kind
+    const key = (x) => `${x.id}:${x.kind}`;
+    const dedup = Object.values(
+      providers.reduce((acc, cur) => ((acc[key(cur)] = acc[key(cur)] || cur), acc), {})
+    );
+
+    res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=600');
+    return res.status(200).json({ 
+      region: region.toUpperCase(), 
+      link: tmdbRegionLink, 
+      providers: dedup 
+    });
+    
+  } catch (error) {
+    return res.status(500).json({ error: 'Internal server error' });
   }
-
-  // Dedupe by provider id + kind
-  const key = (x) => `${x.id}:${x.kind}`;
-  const dedup = Object.values(
-    providers.reduce((acc, cur) => ((acc[key(cur)] = acc[key(cur)] || cur), acc), {})
-  );
-
-  res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=600');
-  return res.status(200).json({ region, link: tmdbRegionLink, providers: dedup });
 }
