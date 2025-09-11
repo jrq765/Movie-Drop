@@ -137,7 +137,7 @@ The web app will be available at `http://localhost:8000`
 
 2. **Universal Link Test**:
    - On recipient device (no app installed), tap the shared bubble
-   - Should open: `https://moviedrop.framer.website/m/{tmdbId}?region=US`
+   - Should open: `https://moviedrop.app/m/{tmdbId}?region=US`
    - Page should show movie details and real provider data
 
 3. **Provider Link Test**:
@@ -178,7 +178,7 @@ curl "http://localhost:3000/api/streaming/27205?region=US"
 If something fails, check these:
 
 **iOS ATS Issues**:
-- Add domain-specific ATS exception for `moviedrop.framer.website` in Info.plist
+- Add domain-specific ATS exception for `moviedrop.app` in Info.plist
 - Ensure `image.tmdb.org` is allowed for poster loading
 
 **Missing TMDB Key**:
@@ -188,7 +188,7 @@ If something fails, check these:
 
 **Framer Issues**:
 - Ensure `/m/[id]` route exists on Framer
-- Verify site is published at `moviedrop.framer.website`
+- Verify site is published at `moviedrop.app`
 - Test universal link manually in browser
 
 ## API Endpoints

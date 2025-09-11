@@ -52,7 +52,7 @@ This is your branded movie landing page system that creates Linktree-style pages
 ## 📱 How It Works
 
 1. **User taps movie** in iMessage extension
-2. **Creates message** with URL like `https://moviedrop.framer.website/m/12345?region=US`
+2. **Creates message** with URL like `https://moviedrop.app/m/12345?region=US`
 3. **Recipient taps card** → Opens your branded landing page
 4. **Page loads movie details** from TMDB API
 5. **Shows streaming providers** with direct links
@@ -87,9 +87,9 @@ The API key is currently hardcoded in the HTML. For production, you should:
 
 ## 📊 Example URLs
 
-- **Fight Club**: `https://moviedrop.framer.website/m/550?region=US`
-- **Dune**: `https://moviedrop.framer.website/m/438631?region=US`
-- **Inception**: `https://moviedrop.framer.website/m/27205?region=US`
+- **Fight Club**: `https://moviedrop.app/m/550?region=US`
+- **Dune**: `https://moviedrop.app/m/438631?region=US`
+- **Inception**: `https://moviedrop.app/m/27205?region=US`
 
 ## 🛠️ Technical Details
 

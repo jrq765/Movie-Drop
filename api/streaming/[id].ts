@@ -2,7 +2,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 const TMDB_KEY = process.env.TMDB_API_KEY!;
 const REGION_DEFAULT = (process.env.REGION_DEFAULT || 'US').toUpperCase();
-const CORS_ALLOW_ORIGIN = process.env.CORS_ALLOW_ORIGIN || 'https://moviedrop.framer.website';
+const CORS_ALLOW_ORIGIN = process.env.CORS_ALLOW_ORIGIN || 'https://moviedrop.app';
 
 function setCORS(res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Origin', CORS_ALLOW_ORIGIN);

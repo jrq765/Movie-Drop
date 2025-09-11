@@ -52,7 +52,7 @@
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>MOVIEDROP_BASE_URL</key>
-	<string>https://moviedrop.framer.website</string>
+	<string>https://moviedrop.app</string>
 	<key>MOVIEDROP_DEFAULT_REGION</key>
 	<string>US</string>
 	<key>MOVIEDROP_API_BASE_URL</key>
@@ -72,7 +72,7 @@
 				<key>NSIncludesSubdomains</key>
 				<true/>
 			</dict>
-			<key>moviedrop.framer.website</key>
+			<key>moviedrop.app</key>
 			<dict>
 				<key>NSExceptionAllowsInsecureHTTPLoads</key>
 				<false/>
