@@ -83,7 +83,7 @@ enum MessageComposer {
 
 // MARK: - Properties
 private var universalBaseURL: String {
-    return Bundle.main.object(forInfoDictionaryKey: "MOVIEDROP_BASE_URL") as? String ?? "https://moviedrop.app"
+    return Bundle.main.object(forInfoDictionaryKey: "MOVIEDROP_BASE_URL") as? String ?? "https://moviedrop.framer.website"
 }
 
 private var currentRegion: String {

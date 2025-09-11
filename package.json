@@ -4,8 +4,9 @@
   "description": "Backend API for MovieDrop - movie sharing app",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js",
+    "dev": "vercel dev",
+    "build": "echo \"Vercel builds functions automatically\"",
+    "start": "vercel dev",
     "test": "jest"
   },
   "keywords": [
