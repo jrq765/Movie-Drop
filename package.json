@@ -4,7 +4,7 @@
   "description": "MovieDrop API - Vercel Serverless Functions",
   "scripts": {
     "dev": "vercel dev",
-    "build": "echo \"Vercel builds functions automatically\""
+    "build": "echo 'Build complete - static files in public directory'"
   },
   "engines": {
     "node": ">=18.0.0"
