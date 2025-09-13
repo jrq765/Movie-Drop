@@ -35,7 +35,7 @@ enum StreamingPlatform: String, CaseIterable, Identifiable {
 }
 
 class StreamingService: ObservableObject {
-    private let baseURL = "http://127.0.0.1:3000/api"
+    private let baseURL = "https://movie-drop.vercel.app/api"
     
     // MARK: - Streaming Platform URLs
     private let streamingPlatforms = [
@@ -44,7 +44,7 @@ class StreamingService: ObservableObject {
         "hulu": "https://www.hulu.com/search?q=",
         "disney": "https://www.disneyplus.com/search?q=",
         "hbo": "https://play.max.com/search?q=",
-        "apple": "https://tv.apple.com/search?q=",
+        "apple": "https://tv.apple.com/search?term=",
         "youtube": "https://www.youtube.com/results?search_query=",
         "paramount": "https://www.paramountplus.com/search?q=",
         "peacock": "https://www.peacocktv.com/search?q="
@@ -69,6 +69,12 @@ class StreamingService: ObservableObject {
     
     /// Get streaming info with affiliate links for only available platforms
     func getStreamingInfo(for movie: Movie) -> [StreamingInfo] {
+        // Use cached streaming URLs from API if available
+        if let cachedURLs = cachedStreamingURLs[movie.id] {
+            return cachedURLs
+        }
+        
+        // Fallback to generated URLs
         let platforms = getAvailablePlatforms(for: movie)
         return platforms.compactMap { platform in
             guard let url = getStreamingURL(for: platform, movieTitle: movie.title) else { return nil }
@@ -83,25 +89,25 @@ class StreamingService: ObservableObject {
 
     // MARK: - Availability Cache
     private var cachedAvailability: [Int: [StreamingPlatform]] = [:]
+    private var cachedStreamingURLs: [Int: [StreamingInfo]] = [:]
 
     private func fetchAvailability(movieId: Int) {
-        guard let url = URL(string: "\(baseURL)/streaming/\(movieId)") else { return }
+        guard let url = URL(string: "\(baseURL)/streaming/\(movieId)?region=US") else { return }
         var request = URLRequest(url: url)
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         URLSession.shared.dataTask(with: request) { [weak self] data, _, _ in
             guard let self = self, let data = data else { return }
-            struct Response: Decodable { let streamingOptions: [Option] }
-            struct Option: Decodable { let platformId: String?; let platform: String? }
+            struct Response: Decodable { let providers: [Provider] }
+            struct Provider: Decodable { let name: String; let url: String; let kind: String }
             if let resp = try? JSONDecoder().decode(Response.self, from: data) {
-                let platforms: [StreamingPlatform] = resp.streamingOptions.compactMap { opt in
-                    if let id = opt.platformId, let p = StreamingPlatform(rawValue: id) { return p }
-                    // fallback by name mapping
-                    switch (opt.platform ?? "").lowercased() {
+                let platforms: [StreamingPlatform] = resp.providers.compactMap { provider in
+                    // Map provider names to our streaming platforms
+                    switch provider.name.lowercased() {
                     case "netflix": return .netflix
-                    case "amazon prime video", "prime": return .prime
+                    case "amazon video", "prime": return .prime
                     case "hulu": return .hulu
                     case "disney+", "disney": return .disney
-                    case "max", "hbo": return .hbo
+                    case "max", "hbo max", "hbo": return .hbo
                     case "apple tv", "apple": return .apple
                     case "youtube", "youtube movies": return .youtube
                     case "paramount+", "paramount": return .paramount
@@ -111,6 +117,20 @@ class StreamingService: ObservableObject {
                 }
                 if !platforms.isEmpty {
                     self.cachedAvailability[movieId] = platforms
+                }
+                
+                // Cache the actual streaming URLs from API
+                let streamingInfos: [StreamingInfo] = resp.providers.compactMap { provider in
+                    guard let url = URL(string: provider.url) else { return nil }
+                    return StreamingInfo(
+                        platform: provider.name,
+                        type: provider.kind == "rent" ? .rent : .subscription,
+                        url: provider.url,
+                        price: provider.kind == "rent" ? "Rent/Buy" : "Subscription"
+                    )
+                }
+                if !streamingInfos.isEmpty {
+                    self.cachedStreamingURLs[movieId] = streamingInfos
                 }
             }
         }.resume()
