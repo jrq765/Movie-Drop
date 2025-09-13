@@ -59,7 +59,7 @@
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>MOVIEDROP_API_BASE_URL</key>
-	<string>https://movie-drop-dddi7qxsc-jr-quints-projects.vercel.app/api</string>
+	<string>https://movie-drop-391uf7orj-jr-quints-projects.vercel.app/api</string>
 	<key>TMDB_API_KEY</key>
 	<string>a5caa7704f1fa4866a6936d8733d1c11</string>
 	<key>NSAppTransportSecurity</key>
