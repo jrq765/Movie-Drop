@@ -1,0 +1,9 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Check for forbidden patterns in staged files
+if git diff --cached --name-only | xargs grep -l "vercel\.app\|/api/m/" 2>/dev/null; then
+  echo "❌ Do not hard-code preview or /api/m links. Use CANONICAL_WEB_BASE + /m/:id."
+  echo "Found vercel.app or /api/m/ patterns in staged files."
+  exit 1
+fi

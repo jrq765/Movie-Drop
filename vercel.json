@@ -5,5 +5,12 @@
       "src": "api/**/*.js",
       "use": "@vercel/node"
     }
+  ],
+  "redirects": [
+    {
+      "source": "/m/:id",
+      "destination": "https://moviedrop.framer.website/m/:id",
+      "permanent": false
+    }
   ]
 }
