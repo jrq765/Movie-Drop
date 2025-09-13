@@ -2,7 +2,7 @@ import Foundation
 
 class MovieService: ObservableObject {
     private var baseURL: String {
-        return Bundle.main.object(forInfoDictionaryKey: "MOVIEDROP_API_BASE_URL") as? String ?? "https://movie-drop-nyxqoqrzp-jr-quints-projects.vercel.app/api"
+        return Bundle.main.object(forInfoDictionaryKey: "MOVIEDROP_API_BASE_URL") as? String ?? "https://movie-drop-78d3p3fww-jr-quints-projects.vercel.app/api"
     }
     
     func searchMovies(query: String) async throws -> [Movie] {
