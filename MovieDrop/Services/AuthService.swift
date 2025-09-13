@@ -7,7 +7,7 @@ class AuthService: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage: String?
     
-    private let baseURL = "https://movie-drop-78d3p3fww-jr-quints-projects.vercel.app/api"
+    private let baseURL = "https://movie-drop-c0oubcxt9-jr-quints-projects.vercel.app/api"
     private var cancellables = Set<AnyCancellable>()
     
     init() {

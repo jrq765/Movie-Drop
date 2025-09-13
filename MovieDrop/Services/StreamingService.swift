@@ -35,7 +35,7 @@ enum StreamingPlatform: String, CaseIterable, Identifiable {
 }
 
 class StreamingService: ObservableObject {
-    private let baseURL = "https://movie-drop-78d3p3fww-jr-quints-projects.vercel.app/api"
+    private let baseURL = "https://movie-drop-c0oubcxt9-jr-quints-projects.vercel.app/api"
     
     // MARK: - Streaming Platform URLs
     private let streamingPlatforms = [
