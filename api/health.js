@@ -1,8 +1,7 @@
-export default function handler(req, res) {
+module.exports = (req, res) => {
   res.status(200).json({ 
     ok: true, 
-    service: 'MovieDrop API v2', 
-    timestamp: Date.now(),
-    deployment: 'fresh'
+    service: 'MovieDrop API', 
+    timestamp: Date.now() 
   });
-}
+};
