@@ -2,7 +2,7 @@ import Foundation
 
 class MovieService: ObservableObject {
     private var baseURL: String {
-        return Bundle.main.object(forInfoDictionaryKey: "MOVIEDROP_API_BASE_URL") as? String ?? "https://moviedrop.app/api"
+        return Bundle.main.object(forInfoDictionaryKey: "MOVIEDROP_API_BASE_URL") as? String ?? "https://movie-drop-nyxqoqrzp-jr-quints-projects.vercel.app/api"
     }
     
     func searchMovies(query: String) async throws -> [Movie] {
@@ -94,6 +94,33 @@ class MovieService: ObservableObject {
             return movie
         } catch {
             print("❌ MovieService: Error getting details - \(error)")
+            throw error
+        }
+    }
+    
+    // MARK: - Popular Movies for Discovery
+    func fetchPopularMovies() async throws -> [Movie] {
+        guard let url = URL(string: "\(baseURL)/popular") else {
+            throw MovieServiceError.invalidURL
+        }
+        
+        var request = URLRequest(url: url)
+        request.cachePolicy = .useProtocolCachePolicy
+        request.timeoutInterval = 15
+        
+        do {
+            let (data, _) = try await URLSession.shared.data(for: request)
+            
+            struct PopularResponse: Codable {
+                let results: [Movie]
+            }
+            
+            let response = try JSONDecoder().decode(PopularResponse.self, from: data)
+            print("✅ MovieService: Successfully got \(response.results.count) popular movies")
+            
+            return response.results
+        } catch {
+            print("❌ MovieService: Error getting popular movies - \(error)")
             throw error
         }
     }

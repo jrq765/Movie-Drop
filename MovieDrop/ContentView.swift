@@ -4,6 +4,7 @@ struct ContentView: View {
     @StateObject private var movieService = MovieService()
     @StateObject private var streamingService = StreamingService()
     @EnvironmentObject var appState: AppState
+    @EnvironmentObject var authService: AuthService
     @State private var searchText = ""
     @State private var searchResults: [Movie] = []
     @State private var isLoading = false
@@ -12,14 +13,36 @@ struct ContentView: View {
     @State private var searchTask: Task<Void, Never>? // For debouncing search requests
     
     var body: some View {
-        NavigationView {
-            VStack(spacing: 0) {
+        TabView {
+            // Search Tab
+            NavigationView {
+                VStack(spacing: 0) {
                 // Header
                 VStack(spacing: 16) {
-                    Text("MovieDrop")
-                        .font(.largeTitle)
-                        .fontWeight(.bold)
-                        .foregroundColor(Color(red: 0.97, green: 0.33, blue: 0.21)) // MovieDrop orange
+                    HStack {
+                        Text("MovieDrop")
+                            .font(.largeTitle)
+                            .fontWeight(.bold)
+                            .foregroundColor(Color(red: 0.97, green: 0.33, blue: 0.21)) // MovieDrop orange
+                        
+                        Spacer()
+                        
+                        // Profile/Logout Button
+                        Menu {
+                            if let user = authService.currentUser {
+                                Text("Welcome, \(user.displayName)")
+                                    .font(.headline)
+                            }
+                            
+                            Button("Logout") {
+                                authService.logout()
+                            }
+                        } label: {
+                            Image(systemName: "person.circle.fill")
+                                .font(.title2)
+                                .foregroundColor(Color(red: 0.97, green: 0.33, blue: 0.21))
+                        }
+                    }
                     
                     // Search Bar
                     HStack {
@@ -125,16 +148,28 @@ struct ContentView: View {
                 }
             }
             .navigationBarHidden(true)
-        }
-        .sheet(isPresented: $showingMovieDetail) {
-            if let movie = selectedMovie {
-                MovieDetailView(movie: movie, streamingService: streamingService)
-            }
-        }
-        .onChange(of: appState.selectedMovieId) { _, newMovieId in
-            if let movieId = newMovieId, let id = Int(movieId) {
-                handleDeepLinkToMovie(id: id)
-            }
+                }
+                .tabItem {
+                    Image(systemName: "magnifyingglass")
+                    Text("Search")
+                }
+                .sheet(isPresented: $showingMovieDetail) {
+                    if let movie = selectedMovie {
+                        MovieDetailView(movie: movie, streamingService: streamingService)
+                    }
+                }
+                .onChange(of: appState.selectedMovieId) { _, newMovieId in
+                    if let movieId = newMovieId, let id = Int(movieId) {
+                        handleDeepLinkToMovie(id: id)
+                    }
+                }
+            
+            // Discovery Tab
+            DiscoveryView()
+                .tabItem {
+                    Image(systemName: "heart.fill")
+                    Text("Discover")
+                }
         }
     }
     

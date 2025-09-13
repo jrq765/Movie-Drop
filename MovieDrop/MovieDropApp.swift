@@ -3,6 +3,7 @@ import SwiftUI
 @main
 struct MovieDropApp: App {
     @StateObject private var appState = AppState()
+    @StateObject private var authService = AuthService()
     @State private var showIntro = true
     
     var body: some Scene {
@@ -17,12 +18,16 @@ struct MovieDropApp: App {
                             }
                         }
                     }
-            } else {
+            } else if authService.isAuthenticated {
                 ContentView()
                     .environmentObject(appState)
+                    .environmentObject(authService)
                     .onOpenURL { url in
                         handleURL(url)
                     }
+            } else {
+                LoginView()
+                    .environmentObject(authService)
             }
         }
     }
