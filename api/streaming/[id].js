@@ -78,6 +78,7 @@ module.exports = async (req, res) => {
         
         // Max (HBO Max) - direct search
         1899: `https://play.max.com/search?q=${title}`,
+        384: `https://play.max.com/search?q=${title}`, // Alternative HBO Max ID
         
         // Amazon Prime Video - direct search
         9: `https://www.amazon.com/s?k=${title}&i=movies-tv`,
