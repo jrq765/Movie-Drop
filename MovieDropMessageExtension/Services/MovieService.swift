@@ -5,7 +5,24 @@ class MovieService: ObservableObject {
         return Bundle.main.object(forInfoDictionaryKey: "MOVIEDROP_API_BASE_URL") as? String ?? "https://moviedrop.app/api"
     }
     
+    // Cache for search results
+    private var searchCache: [String: [Movie]] = [:]
+    private let cacheQueue = DispatchQueue(label: "com.moviedrop.cache", attributes: .concurrent)
+    
     func searchMovies(query: String, completion: @escaping (Result<[Movie], Error>) -> Void) {
+        let normalizedQuery = query.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        // Check cache first
+        cacheQueue.async(flags: .barrier) { [weak self] in
+            if let cachedResults = self?.searchCache[normalizedQuery] {
+                DispatchQueue.main.async {
+                    print("📦 Using cached results for: \(query)")
+                    completion(.success(cachedResults))
+                }
+                return
+            }
+        }
+        
         // Use TMDB API directly
         let tmdbApiKey = Bundle.main.object(forInfoDictionaryKey: "TMDB_API_KEY") as? String ?? ""
         guard let encodedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
@@ -18,7 +35,7 @@ class MovieService: ObservableObject {
         print("🔍 Searching for: \(query)")
         print("🌐 URL: \(url)")
         
-        var request = URLRequest(url: url)
+        var request = URLRequest(url: url, cachePolicy: .useProtocolCachePolicy, timeoutInterval: 15)
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         
         URLSession.shared.dataTask(with: request) { data, response, error in
@@ -77,6 +94,12 @@ class MovieService: ObservableObject {
                 } else {
                     print("📋 First movie: \(filteredMovies[0].title)")
                 }
+                
+                // Cache the results
+                self.cacheQueue.async(flags: .barrier) {
+                    self.searchCache[normalizedQuery] = filteredMovies
+                }
+                
                 completion(.success(filteredMovies))
             } catch {
                 print("❌ Decoding error: \(error)")

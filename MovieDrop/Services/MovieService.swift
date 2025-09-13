@@ -18,7 +18,7 @@ class MovieService: ObservableObject {
         
         print("🌐 MovieService: Making request to \(url)")
         
-        var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 30)
+        var request = URLRequest(url: url, cachePolicy: .useProtocolCachePolicy, timeoutInterval: 15)
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         
         do {
@@ -78,10 +78,8 @@ class MovieService: ObservableObject {
             throw MovieServiceError.invalidURL
         }
         
-        var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 30)
+        var request = URLRequest(url: url, cachePolicy: .useProtocolCachePolicy, timeoutInterval: 15)
         request.setValue("application/json", forHTTPHeaderField: "Accept")
-        request.setValue("no-cache", forHTTPHeaderField: "Cache-Control")
-        request.setValue("no-cache", forHTTPHeaderField: "Pragma")
         
         do {
             let (data, response) = try await URLSession.shared.data(for: request)

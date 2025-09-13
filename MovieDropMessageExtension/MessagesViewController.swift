@@ -83,7 +83,7 @@ enum MessageComposer {
 
 // MARK: - Properties
 private var universalBaseURL: String {
-    return Bundle.main.object(forInfoDictionaryKey: "MOVIEDROP_BASE_URL") as? String ?? "https://moviedrop.framer.website"
+    return Bundle.main.object(forInfoDictionaryKey: "MOVIEDROP_BASE_URL") as? String ?? "https://moviedrop.app"
 }
 
 private var currentRegion: String {
@@ -110,6 +110,7 @@ class MessagesViewController: MSMessagesAppViewController {
     private var searchBar: UISearchBar!
     private var emptyStateLabel: UILabel!
     private var isInserting = false // Debounce flag to prevent multiple inserts
+    private var searchTask: Task<Void, Never>? // For debouncing search requests
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -240,25 +241,40 @@ class MessagesViewController: MSMessagesAppViewController {
     }
     
     private func searchMovies(query: String) {
+        // Cancel previous search task
+        searchTask?.cancel()
+        
         guard !query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             searchResults = []
             updateUI()
             return
         }
         
-        print("🔍 Searching for: \(query)")
-        
-        movieService.searchMovies(query: query) { [weak self] result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let movies):
-                    print("✅ Found \(movies.count) movies")
-                    self?.searchResults = movies
-                    self?.updateUI()
-                case .failure(let error):
-                    print("❌ Search error: \(error)")
-                    self?.searchResults = []
-                    self?.updateUI()
+        // Debounce search requests
+        searchTask = Task { [weak self] in
+            // Wait 300ms before making the request
+            try? await Task.sleep(nanoseconds: 300_000_000)
+            
+            // Check if task was cancelled
+            guard !Task.isCancelled else { return }
+            
+            print("🔍 Searching for: \(query)")
+            
+            await withCheckedContinuation { continuation in
+                self?.movieService.searchMovies(query: query) { result in
+                    DispatchQueue.main.async {
+                        switch result {
+                        case .success(let movies):
+                            print("✅ Found \(movies.count) movies")
+                            self?.searchResults = movies
+                            self?.updateUI()
+                        case .failure(let error):
+                            print("❌ Search error: \(error)")
+                            self?.searchResults = []
+                            self?.updateUI()
+                        }
+                        continuation.resume()
+                    }
                 }
             }
         }
@@ -486,15 +502,14 @@ class MovieTableViewCell: UITableViewCell {
         self.isUserInteractionEnabled = true
         self.contentView.isUserInteractionEnabled = true
         
-        // Load poster image
+        // Load poster image with caching
         if let posterURL = movie.posterURL {
-            URLSession.shared.dataTask(with: posterURL) { [weak self] data, _, _ in
-                if let data = data, let image = UIImage(data: data) {
-                    DispatchQueue.main.async {
-                        self?.posterImageView.image = image
-                    }
+            Task {
+                let image = await ImageLoader.fetchDownsampled(posterURL, maxPixel: 120)
+                await MainActor.run {
+                    self.posterImageView.image = image ?? UIImage(systemName: "film")
                 }
-            }.resume()
+            }
         } else {
             posterImageView.image = UIImage(systemName: "film")
         }

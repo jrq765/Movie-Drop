@@ -3,11 +3,13 @@ import SwiftUI
 struct ContentView: View {
     @StateObject private var movieService = MovieService()
     @StateObject private var streamingService = StreamingService()
+    @EnvironmentObject var appState: AppState
     @State private var searchText = ""
     @State private var searchResults: [Movie] = []
     @State private var isLoading = false
     @State private var selectedMovie: Movie?
     @State private var showingMovieDetail = false
+    @State private var searchTask: Task<Void, Never>? // For debouncing search requests
     
     var body: some View {
         NavigationView {
@@ -17,7 +19,7 @@ struct ContentView: View {
                     Text("MovieDrop")
                         .font(.largeTitle)
                         .fontWeight(.bold)
-                        .foregroundColor(.primary)
+                        .foregroundColor(Color(red: 0.97, green: 0.33, blue: 0.21)) // MovieDrop orange
                     
                     // Search Bar
                     HStack {
@@ -27,20 +29,24 @@ struct ContentView: View {
                         TextField("Search movies...", text: $searchText)
                             .font(.system(size: 16))
                             .onSubmit {
-                                performSearch()
+                                performSearchDebounced()
                             }
                             .onChange(of: searchText) { _, newValue in
                                 if newValue.count > 2 {
-                                    performSearch()
+                                    performSearchDebounced()
                                 } else if newValue.isEmpty {
+                                    searchTask?.cancel()
                                     searchResults = []
+                                    isLoading = false
                                 }
                             }
                         
                         if !searchText.isEmpty {
                             Button(action: {
+                                searchTask?.cancel()
                                 searchText = ""
                                 searchResults = []
+                                isLoading = false
                             }) {
                                 Image(systemName: "xmark.circle.fill")
                                     .foregroundColor(.gray)
@@ -51,6 +57,10 @@ struct ContentView: View {
                     .padding(.vertical, 12)
                     .background(Color(.systemGray6))
                     .cornerRadius(12)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color(red: 0.97, green: 0.33, blue: 0.21).opacity(0.3), lineWidth: 1)
+                    )
                     
                 }
                 .padding(.horizontal, 20)
@@ -121,6 +131,11 @@ struct ContentView: View {
                 MovieDetailView(movie: movie, streamingService: streamingService)
             }
         }
+        .onChange(of: appState.selectedMovieId) { _, newMovieId in
+            if let movieId = newMovieId, let id = Int(movieId) {
+                handleDeepLinkToMovie(id: id)
+            }
+        }
     }
     
     private func refresh() async {
@@ -137,27 +152,73 @@ struct ContentView: View {
         }
     }
     
-    private func performSearch() {
+    private func performSearchDebounced() {
+        // Cancel previous search task
+        searchTask?.cancel()
+        
+        guard !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            return
+        }
+        
+        // Debounce search requests
+        searchTask = Task {
+            // Wait 500ms before making the request
+            try? await Task.sleep(nanoseconds: 500_000_000)
+            
+            // Check if task was cancelled
+            guard !Task.isCancelled else { return }
+            
+            await performSearch()
+        }
+    }
+    
+    private func performSearch() async {
         guard !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             return
         }
         
         print("🔍 Starting search for: '\(searchText)'")
+        await MainActor.run {
+            isLoading = true
+        }
+        
+        do {
+            let results = try await movieService.searchMovies(query: searchText)
+            await MainActor.run {
+                print("✅ Search completed. Found \(results.count) movies")
+                searchResults = results
+                isLoading = false
+            }
+        } catch {
+            await MainActor.run {
+                print("❌ Search failed: \(error)")
+                searchResults = []
+                isLoading = false
+            }
+        }
+    }
+    
+    private func handleDeepLinkToMovie(id: Int) {
+        print("🔗 Handling deep link to movie ID: \(id)")
         isLoading = true
         
         Task {
             do {
-                let results = try await movieService.searchMovies(query: searchText)
+                let movie = try await movieService.getMovieDetails(id: id)
                 await MainActor.run {
-                    print("✅ Search completed. Found \(results.count) movies")
-                    searchResults = results
+                    print("✅ Deep link: Successfully loaded movie: \(movie.title)")
+                    selectedMovie = movie
+                    showingMovieDetail = true
                     isLoading = false
+                    // Clear the selected movie ID to prevent re-triggering
+                    appState.selectedMovieId = nil
                 }
             } catch {
                 await MainActor.run {
-                    print("❌ Search failed: \(error)")
-                    searchResults = []
+                    print("❌ Deep link: Failed to load movie details: \(error)")
                     isLoading = false
+                    // Clear the selected movie ID even on failure
+                    appState.selectedMovieId = nil
                 }
             }
         }
@@ -300,7 +361,7 @@ struct MovieDetailView: View {
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 16)
-                        .background(Color.green)
+                        .background(Color(red: 0.97, green: 0.33, blue: 0.21)) // MovieDrop orange
                         .cornerRadius(12)
                     }
                 }
@@ -320,23 +381,33 @@ struct MovieDetailView: View {
     }
     
     private func shareMovie() {
+        // Create the movie URL for the web version
+        let movieURL = "https://moviedrop.app/m/\(movie.id)"
+        
+        // Create a rich movie card message
         let movieCard = createMovieCard()
         
-        // Create a URL for the movie (for future use)
-        _ = URL(string: "https://moviedrop.app/movie/\(movie.id)")!
-        
-        // Create the message content
+        // Create the message content with the web URL
         let messageContent = """
         🎬 \(movie.title)
         
         \(movieCard)
         
-        Check it out on MovieDrop!
+        Watch it here: \(movieURL)
+        
+        📱 Get the MovieDrop app for the best experience!
         """
         
-        // Open Messages app with the content
-        if let url = URL(string: "sms:&body=\(messageContent.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")") {
-            UIApplication.shared.open(url)
+        // Use the native share sheet for better sharing options
+        let activityViewController = UIActivityViewController(
+            activityItems: [messageContent, URL(string: movieURL)!],
+            applicationActivities: nil
+        )
+        
+        // Present the share sheet
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let window = windowScene.windows.first {
+            window.rootViewController?.present(activityViewController, animated: true)
         }
     }
     
@@ -375,7 +446,7 @@ struct StreamingButton: View {
             .frame(maxWidth: .infinity)
             .padding(.vertical, 16)
             .padding(.horizontal, 20)
-            .background(Color.blue)
+            .background(Color(red: 0.97, green: 0.33, blue: 0.21)) // MovieDrop orange
             .cornerRadius(12)
         }
     }

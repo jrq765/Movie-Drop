@@ -3,14 +3,27 @@ import SwiftUI
 @main
 struct MovieDropApp: App {
     @StateObject private var appState = AppState()
+    @State private var showIntro = true
     
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .environmentObject(appState)
-                .onOpenURL { url in
-                    handleURL(url)
-                }
+            if showIntro {
+                IntroView()
+                    .onAppear {
+                        // Hide intro after 3 seconds
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+                            withAnimation(.easeInOut(duration: 0.5)) {
+                                showIntro = false
+                            }
+                        }
+                    }
+            } else {
+                ContentView()
+                    .environmentObject(appState)
+                    .onOpenURL { url in
+                        handleURL(url)
+                    }
+            }
         }
     }
     
