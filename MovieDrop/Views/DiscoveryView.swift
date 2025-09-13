@@ -211,18 +211,18 @@ struct MovieCard: View {
                     .foregroundColor(.white)
                     .lineLimit(2)
                 
-                Text(movie.overview)
+                Text(movie.overview ?? "No overview available")
                     .font(.body)
                     .foregroundColor(.gray)
                     .lineLimit(4)
                 
                 HStack {
-                    Text("⭐ \(String(format: "%.1f", movie.voteAverage))")
+                    Text("⭐ \(String(format: "%.1f", movie.voteAverage ?? 0.0))")
                         .foregroundColor(.yellow)
                     
                     Spacer()
                     
-                    Text(movie.releaseDate.prefix(4))
+                    Text((movie.releaseDate ?? "").prefix(4))
                         .foregroundColor(.gray)
                 }
             }
@@ -242,10 +242,10 @@ struct MovieCard: View {
                 .onEnded { value in
                     let threshold: CGFloat = 100
                     
-                    if value.translation.x > threshold {
+                    if value.translation.width > threshold {
                         // Swipe right - add to watchlist
                         onSwipeRight()
-                    } else if value.translation.x < -threshold {
+                    } else if value.translation.width < -threshold {
                         // Swipe left - pass
                         onSwipeLeft()
                     } else {
@@ -281,7 +281,7 @@ struct WatchlistView: View {
                     VStack(alignment: .leading) {
                         Text(movie.title)
                             .font(.headline)
-                        Text(movie.overview)
+                        Text(movie.overview ?? "No overview available")
                             .font(.caption)
                             .foregroundColor(.gray)
                             .lineLimit(2)
