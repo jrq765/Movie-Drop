@@ -43,6 +43,17 @@ app.get('/health', (req, res) => {
   });
 });
 
+// Database migration endpoint (for debugging)
+app.post('/migrate', async (req, res) => {
+  try {
+    await initializeDatabase();
+    res.json({ success: true, message: 'Database migration completed' });
+  } catch (error) {
+    console.error('Migration error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/movies', movieRoutes);
