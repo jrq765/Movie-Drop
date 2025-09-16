@@ -50,6 +50,8 @@ async function initializeDatabase() {
         id SERIAL PRIMARY KEY,
         user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
         movie_id INTEGER NOT NULL,
+        movie_title VARCHAR(255),
+        movie_poster VARCHAR(500),
         list_type VARCHAR(50) NOT NULL, -- 'watchlist', 'watched', 'favorites'
         rating INTEGER CHECK (rating >= 1 AND rating <= 5),
         review TEXT,

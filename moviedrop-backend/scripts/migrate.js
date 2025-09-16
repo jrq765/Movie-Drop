@@ -1,3 +1,4 @@
+
 const { initializeDatabase } = require('../config/database');
 
 async function runMigration() {

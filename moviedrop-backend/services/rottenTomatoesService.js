@@ -43,12 +43,13 @@ class RottenTomatoesService {
                 if (rtData) return rtData;
             }
 
-            // Fallback: Return mock data
-            return this.getMockRottenTomatoesData(movieTitle);
+            // No fallback - return null if no data found
+            console.warn(`No Rotten Tomatoes data found for: ${movieTitle}`);
+            return null;
 
         } catch (error) {
             console.error('Error fetching Rotten Tomatoes data:', error);
-            return this.getMockRottenTomatoesData(movieTitle);
+            return null;
         }
     }
 
@@ -57,25 +58,50 @@ class RottenTomatoesService {
      */
     async getFromOMDb(movieTitle, releaseYear) {
         try {
-            const response = await axios.get(this.omdbBaseUrl, {
-                params: {
-                    apikey: this.omdbApiKey,
-                    t: movieTitle,
-                    y: releaseYear,
-                    plot: 'short'
-                }
-            });
+            console.log(`🔍 OMDb: Searching for "${movieTitle}" (${releaseYear})`);
+            
+            // Try multiple search strategies
+            const searchStrategies = [
+                { t: movieTitle, y: releaseYear },
+                { t: movieTitle }, // Without year
+                { t: movieTitle.replace(/[^\w\s]/g, '') }, // Remove special characters
+                { t: movieTitle.split(' ')[0] } // Just first word
+            ];
+            
+            for (const strategy of searchStrategies) {
+                try {
+                    const response = await axios.get(this.omdbBaseUrl, {
+                        params: {
+                            apikey: this.omdbApiKey,
+                            ...strategy,
+                            plot: 'short'
+                        }
+                    });
 
-            if (response.data.Response === 'True') {
-                const data = response.data;
-                return {
-                    tomatometer: this.parseRating(data.Ratings?.find(r => r.Source === 'Rotten Tomatoes')?.Value),
-                    audienceScore: this.parseRating(data.Ratings?.find(r => r.Source === 'Internet Movie Database')?.Value),
-                    imdbRating: data.imdbRating,
-                    metascore: data.Metascore,
-                    source: 'OMDb'
-                };
+                    console.log(`📊 OMDb Response for "${strategy.t}":`, response.data.Response);
+                    if (response.data.Response === 'True') {
+                        const data = response.data;
+                        const rtRating = data.Ratings?.find(r => r.Source === 'Rotten Tomatoes')?.Value;
+                        const tomatometer = this.parseRating(rtRating);
+                        
+                        if (tomatometer !== null) {
+                            console.log(`🍅 Rotten Tomatoes rating found: ${rtRating} -> ${tomatometer}%`);
+                            
+                            return {
+                                tomatometer: tomatometer,
+                                audienceScore: this.parseRating(data.Ratings?.find(r => r.Source === 'Internet Movie Database')?.Value),
+                                imdbRating: data.imdbRating,
+                                metascore: data.Metascore,
+                                source: 'OMDb'
+                            };
+                        }
+                    }
+                } catch (strategyError) {
+                    console.log(`⚠️ OMDb strategy failed for "${strategy.t}":`, strategyError.message);
+                }
             }
+            
+            console.log(`❌ OMDb: No RT data found for "${movieTitle}"`);
         } catch (error) {
             console.error('OMDb API error:', error);
         }
@@ -139,8 +165,8 @@ class RottenTomatoesService {
             if (response.data.Search && response.data.Search.length > 0) {
                 const movie = response.data.Search[0];
                 return {
-                    tomatometer: Math.floor(Math.random() * 40) + 60, // Mock data
-                    audienceScore: Math.floor(Math.random() * 40) + 60,
+                    tomatometer: null, // No RT data available
+                    audienceScore: null,
                     source: 'RapidAPI'
                 };
             }
@@ -176,51 +202,6 @@ class RottenTomatoesService {
         return null;
     }
 
-    /**
-     * Generate mock RT data for development
-     */
-    getMockRottenTomatoesData(movieTitle) {
-        // Generate consistent mock data based on movie title
-        const hash = this.simpleHash(movieTitle);
-        const baseScore = 60 + (hash % 35); // Score between 60-95
-        
-        return {
-            tomatometer: baseScore,
-            audienceScore: baseScore + (hash % 10) - 5, // Audience score ±5 from critic score
-            criticsConsensus: this.getMockConsensus(baseScore),
-            source: 'Mock Data'
-        };
-    }
-
-    /**
-     * Simple hash function for consistent mock data
-     */
-    simpleHash(str) {
-        let hash = 0;
-        for (let i = 0; i < str.length; i++) {
-            const char = str.charCodeAt(i);
-            hash = ((hash << 5) - hash) + char;
-            hash = hash & hash; // Convert to 32-bit integer
-        }
-        return Math.abs(hash);
-    }
-
-    /**
-     * Get mock consensus based on score
-     */
-    getMockConsensus(score) {
-        if (score >= 90) {
-            return "Certified Fresh! Critics agree this is a must-see masterpiece.";
-        } else if (score >= 80) {
-            return "Fresh! Critics praise this film for its quality and entertainment value.";
-        } else if (score >= 70) {
-            return "Mostly Fresh. Critics find this film enjoyable with some reservations.";
-        } else if (score >= 60) {
-            return "Mixed reviews. Critics are divided on this film's merits.";
-        } else {
-            return "Rotten. Critics found this film lacking in several areas.";
-        }
-    }
 }
 
 module.exports = RottenTomatoesService;
