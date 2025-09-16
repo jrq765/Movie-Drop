@@ -113,6 +113,52 @@ async function initializeDatabase() {
       )
     `);
 
+    // Create user_signals table for tracking user preferences
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS user_signals (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+        movie_id INTEGER NOT NULL,
+        action VARCHAR(50) NOT NULL, -- 'like', 'dismiss', 'share', 'watchlist'
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(user_id, movie_id, action)
+      )
+    `);
+
+    // Create movies table for storing movie metadata
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS movies (
+        id INTEGER PRIMARY KEY,
+        title VARCHAR(255) NOT NULL,
+        overview TEXT,
+        poster_path VARCHAR(500),
+        backdrop_path VARCHAR(500),
+        release_date DATE,
+        popularity DECIMAL(10,2),
+        vote_average DECIMAL(3,1),
+        vote_count INTEGER,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    // Create genres table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS genres (
+        id INTEGER PRIMARY KEY,
+        name VARCHAR(100) NOT NULL UNIQUE
+      )
+    `);
+
+    // Create movie_genres junction table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS movie_genres (
+        movie_id INTEGER REFERENCES movies(id) ON DELETE CASCADE,
+        genre_id INTEGER REFERENCES genres(id) ON DELETE CASCADE,
+        PRIMARY KEY (movie_id, genre_id)
+      )
+    `);
+
     console.log('✅ Database tables initialized successfully');
   } catch (error) {
     console.error('❌ Error initializing database:', error);
