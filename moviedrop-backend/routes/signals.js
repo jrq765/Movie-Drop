@@ -17,7 +17,7 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ error: 'movieId and action are required' });
     }
 
-    // Insert signal into database
+    // Insert signal into database (allow null user_id for anonymous users)
     const query = `
       INSERT INTO user_signals (user_id, movie_id, action, created_at)
       VALUES ($1, $2, $3, $4)

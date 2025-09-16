@@ -7,8 +7,6 @@ require('dotenv').config();
 const authRoutes = require('./routes/auth');
 const movieRoutes = require('./routes/movies');
 const streamingRoutes = require('./routes/streaming');
-const signalsRoutes = require('./routes/signals');
-const recommendRoutes = require('./routes/recommend');
 const { initializeDatabase } = require('./config/database');
 
 const app = express();
@@ -43,23 +41,10 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Database migration endpoint (for debugging)
-app.post('/migrate', async (req, res) => {
-  try {
-    await initializeDatabase();
-    res.json({ success: true, message: 'Database migration completed' });
-  } catch (error) {
-    console.error('Migration error:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
-
 // API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/movies', movieRoutes);
 app.use('/api/streaming', streamingRoutes);
-app.use('/signals', signalsRoutes);
-app.use('/recommend', recommendRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
