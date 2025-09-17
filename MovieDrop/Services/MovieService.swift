@@ -147,7 +147,7 @@ class MovieService: ObservableObject {
         
         let timestamp = Int(Date().timeIntervalSince1970)
         let randomId = Int.random(in: 1000...9999)
-        let urlString = "\(watchlistBaseURL)/movies/recommendations/\(userId)?limit=20&t=\(timestamp)&r=\(randomId)"
+        let urlString = "\(baseURL)/movies?randomize=true&t=\(timestamp)&r=\(randomId)"
         print("🔗 MovieService: Calling recommendations URL: \(urlString)")
         guard let url = URL(string: urlString) else {
             print("❌ MovieService: Invalid URL for recommendations")
