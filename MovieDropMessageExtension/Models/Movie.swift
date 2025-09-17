@@ -90,11 +90,39 @@ struct StreamingInfo: Codable {
     let url: String
     let price: String?
     
+    // New fields from API response
+    let providerId: Int?
+    let logoPath: String?
+    let displayPriority: Int?
+    let kind: String?
+    
+    // Custom initializer
+    init(platform: String, type: StreamingType, url: String, price: String?, providerId: Int?, logoPath: String?, displayPriority: Int?, kind: String?) {
+        self.platform = platform
+        self.type = type
+        self.url = url
+        self.price = price
+        self.providerId = providerId
+        self.logoPath = logoPath
+        self.displayPriority = displayPriority
+        self.kind = kind
+    }
+    
+    enum CodingKeys: String, CodingKey {
+        case platform, type, url, price
+        case providerId = "provider_id"
+        case logoPath = "logo_path"
+        case displayPriority = "display_priority"
+        case kind
+    }
+    
     enum StreamingType: String, Codable {
         case free = "free"
         case subscription = "subscription"
         case rent = "rent"
         case buy = "buy"
+        case rentBuy = "rent/buy"
+        case flatrate = "flatrate"
     }
 }
 
