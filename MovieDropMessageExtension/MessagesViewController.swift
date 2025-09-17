@@ -92,7 +92,8 @@ enum MessageComposer {
         
         // Include the web universal link in the caption as a fallback
         if let webURL = buildURL(base: universalBaseURL, movieId: card.id, region: region) {
-            layout.caption = (card.overview?.isEmpty == false ? card.overview : "Shared via MovieDrop") + "\n🔗 Open in browser: \(webURL.absoluteString)"
+            let overviewText = (card.overview?.isEmpty == false ? card.overview! : "Shared via MovieDrop")
+            layout.caption = overviewText + "\n🔗 Open in browser: \(webURL.absoluteString)"
         }
         return message
     }
