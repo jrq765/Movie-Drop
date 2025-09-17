@@ -180,6 +180,18 @@ struct StreamingInfo: Codable {
     let displayPriority: Int?
     let kind: String?
     
+    // Custom initializer
+    init(platform: String, type: StreamingType, url: String, price: String?, providerId: Int?, logoPath: String?, displayPriority: Int?, kind: String?) {
+        self.platform = platform
+        self.type = type
+        self.url = url
+        self.price = price
+        self.providerId = providerId
+        self.logoPath = logoPath
+        self.displayPriority = displayPriority
+        self.kind = kind
+    }
+    
     enum CodingKeys: String, CodingKey {
         case platform, type, url, price
         case providerId = "provider_id"
