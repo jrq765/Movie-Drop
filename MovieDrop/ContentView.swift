@@ -710,6 +710,10 @@ struct MovieDropStreamingCard: View {
             return "Buy"
         case .free:
             return "Free"
+        case .rentBuy:
+            return "Rent/Buy"
+        case .flatrate:
+            return "Subscription"
         }
     }
     
