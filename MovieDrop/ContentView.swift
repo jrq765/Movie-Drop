@@ -340,6 +340,10 @@ struct MovieDetailView: View {
     @ObservedObject var streamingService: StreamingService
     @Environment(\.dismiss) private var dismiss
     
+    private var totalStreamingCount: Int {
+        streamingService.getStreamingCount(for: movie)
+    }
+    
     var body: some View {
         NavigationView {
             ScrollView {
@@ -392,9 +396,8 @@ struct MovieDetailView: View {
                             
                             Spacer()
                             
-                            let totalCount = streamingService.getStreamingCount(for: movie)
-                            if totalCount > 0 {
-                                Text("\(totalCount) options")
+                            if totalStreamingCount > 0 {
+                                Text("\(totalStreamingCount) options")
                                     .font(.caption)
                                     .foregroundColor(.secondary)
                                     .padding(.horizontal, 8)
