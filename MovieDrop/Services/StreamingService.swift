@@ -182,72 +182,76 @@ class StreamingService: ObservableObject {
                             print("🎬 StreamingService: Provider \(index + 1): \(provider.name) - \(provider.url)")
                         }
                 
-                // Convert to StreamingInfo and combine ALL types for same platform
-                var platformMap: [String: (types: Set<String>, url: String, name: String)] = [:]
-                
-                for provider in resp.providers {
-                    guard let url = URL(string: provider.url) else { continue }
-                    
-                    let platformName = provider.name
-                    
-                    if var existing = platformMap[platformName] {
-                        // Add this type to the existing platform
-                        existing.types.insert(provider.kind)
-                        // Keep the first URL we found (usually subscription is first)
-                        platformMap[platformName] = existing
-                    } else {
-                        // First time seeing this platform
-                        platformMap[platformName] = (
-                            types: Set([provider.kind]),
-                            url: provider.url,
-                            name: platformName
-                        )
-                    }
-                }
-                
-                // Convert to StreamingInfo with combined options
-                let streamingInfos: [StreamingInfo] = platformMap.compactMap { (platformName, data) in
-                    let types = data.types
-                    let url = data.url
-                    
-                    // Determine the best type and price text
+                // Convert API providers directly to StreamingInfo (API already provides merged providers)
+                let streamingInfos: [StreamingInfo] = resp.providers.compactMap { provider in
+                    // Map API kind to StreamingType
                     let streamingType: StreamingInfo.StreamingType
                     let priceText: String
                     
-                    if types.contains("flatrate") {
-                        streamingType = .subscription
+                    switch provider.kind {
+                    case "flatrate":
+                        streamingType = .flatrate
                         priceText = "Subscription"
-                    } else if types.contains("rent") && types.contains("buy") {
-                        streamingType = .rent
+                    case "rent/buy":
+                        streamingType = .rentBuy
                         priceText = "Rent/Buy"
-                    } else if types.contains("rent") {
+                    case "rent":
                         streamingType = .rent
                         priceText = "Rent"
-                    } else if types.contains("buy") {
+                    case "buy":
                         streamingType = .buy
                         priceText = "Buy"
-                    } else {
-                        streamingType = .subscription
+                    default:
+                        streamingType = .flatrate
                         priceText = "Available"
                     }
                     
                     return StreamingInfo(
-                        platform: platformName,
+                        platform: provider.name,
                         type: streamingType,
-                        url: url,
-                        price: priceText
+                        url: provider.url,
+                        price: priceText,
+                        providerId: provider.provider_id,
+                        logoPath: provider.logo_path,
+                        displayPriority: provider.display_priority,
+                        kind: provider.kind
                     )
                 }
                 
-                print("🎬 StreamingService: Final streaming infos: \(streamingInfos.count)")
+                // Sort by display_priority (ascending) then by type priority (flatrate > rent > buy)
+                let sortedStreamingInfos = streamingInfos.sorted { first, second in
+                    // First sort by display_priority
+                    if let firstPriority = first.displayPriority, let secondPriority = second.displayPriority {
+                        if firstPriority != secondPriority {
+                            return firstPriority < secondPriority
+                        }
+                    }
+                    
+                    // Then sort by type priority
+                    let typePriority: [StreamingInfo.StreamingType: Int] = [
+                        .flatrate: 1,
+                        .subscription: 1,
+                        .rentBuy: 2,
+                        .rent: 3,
+                        .buy: 4,
+                        .free: 5
+                    ]
+                    
+                    let firstTypePriority = typePriority[first.type] ?? 6
+                    let secondTypePriority = typePriority[second.type] ?? 6
+                    
+                    return firstTypePriority < secondTypePriority
+                }
+                
+                print("🎬 StreamingService: Final streaming infos: \(sortedStreamingInfos.count)")
                 
                 DispatchQueue.main.async {
                     // Remove from fetch progress
                     self.fetchInProgress.remove(movieId)
                     
-                    if !streamingInfos.isEmpty {
-                        print("🎬 StreamingService: Updating cache for movie \(movieId) with \(streamingInfos.count) streaming options")
-                        self.streamingByMovieId[movieId] = streamingInfos
+                    if !sortedStreamingInfos.isEmpty {
+                        print("🎬 StreamingService: Updating cache for movie \(movieId) with \(sortedStreamingInfos.count) streaming options")
+                        self.streamingByMovieId[movieId] = sortedStreamingInfos
                         self.streamingCountsByMovieId[movieId] = (flatrate: resp.counts.flatrate, rent: resp.counts.rent, buy: resp.counts.buy)
                         print("🎬 StreamingService: Cache updated. Total cached movies: \(self.streamingByMovieId.keys.count)")
                     } else {

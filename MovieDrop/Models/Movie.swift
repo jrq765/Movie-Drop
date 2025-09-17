@@ -174,10 +174,26 @@ struct StreamingInfo: Codable {
     let url: String
     let price: String?
     
+    // New fields from API response
+    let providerId: Int?
+    let logoPath: String?
+    let displayPriority: Int?
+    let kind: String?
+    
+    enum CodingKeys: String, CodingKey {
+        case platform, type, url, price
+        case providerId = "provider_id"
+        case logoPath = "logo_path"
+        case displayPriority = "display_priority"
+        case kind
+    }
+    
     enum StreamingType: String, Codable {
         case free = "free"
         case subscription = "subscription"
         case rent = "rent"
         case buy = "buy"
+        case rentBuy = "rent/buy"
+        case flatrate = "flatrate"
     }
 }

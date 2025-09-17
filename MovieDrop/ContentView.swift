@@ -396,22 +396,23 @@ struct MovieDetailView: View {
                             let streamingInfo = streamingService.getStreamingInfo(for: movie)
                             
                             if streamingInfo.isEmpty {
-                                // Show loading state with company colors
-                                HStack {
-                                    ProgressView()
-                                        .scaleEffect(0.8)
-                                        .tint(Color(red: 0.97, green: 0.33, blue: 0.21))
-                                    Text("Finding available streaming options...")
+                                // Show honest empty state
+                                VStack(spacing: 8) {
+                                    Image(systemName: "tv")
+                                        .font(.title2)
+                                        .foregroundColor(.secondary)
+                                    Text("No streaming found for your region yet")
                                         .font(.subheadline)
                                         .foregroundColor(.secondary)
+                                        .multilineTextAlignment(.center)
                                 }
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 20)
-                                .background(Color(red: 0.97, green: 0.33, blue: 0.21).opacity(0.1))
+                                .background(Color(.systemGray6))
                                 .cornerRadius(12)
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 12)
-                                        .stroke(Color(red: 0.97, green: 0.33, blue: 0.21).opacity(0.3), lineWidth: 1)
+                                        .stroke(Color(.systemGray4), lineWidth: 0.5)
                                 )
                             } else {
                                 // Show only real streaming options for this specific movie
@@ -625,12 +626,31 @@ struct MovieDropStreamingCard: View {
     
     @ViewBuilder
     private var providerIcon: some View {
+        // Use actual provider logo from TMDB if available
+        if let logoPath = info.logoPath, !logoPath.isEmpty {
+            AsyncImage(url: URL(string: "https://image.tmdb.org/t/p/w45\(logoPath)")) { image in
+                image
+                    .resizable()
+                    .scaledToFit()
+            } placeholder: {
+                fallbackIcon
+            }
+            .frame(width: 24, height: 24)
+            .clipShape(RoundedRectangle(cornerRadius: 4))
+        } else {
+            fallbackIcon
+        }
+    }
+    
+    @ViewBuilder
+    private var fallbackIcon: some View {
         // Use platform-specific icons or fallback to first letter
         switch platformName.lowercased() {
         case let name where name.contains("netflix"):
             Image(systemName: "play.rectangle.fill")
                 .foregroundColor(.red)
         case let name where name.contains("prime") || name.contains("amazon"):
+            // Use Prime Video specific icon (not Amazon shopping bag)
             Image(systemName: "play.rectangle.fill")
                 .foregroundColor(.blue)
         case let name where name.contains("hulu"):
