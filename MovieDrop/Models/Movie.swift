@@ -110,26 +110,26 @@ struct Movie: Identifiable, Codable {
         communityReviews = try container.decodeIfPresent([String].self, forKey: .communityReviews) ?? camel?.decodeIfPresent([String].self, forKey: .communityReviews)
     }
 
-    // MARK: - Computed URLs (Optimized for mobile performance)
+    // MARK: - Computed URLs (High resolution for better quality)
     var posterURL: URL? {
         guard let posterPath = posterPath, !posterPath.isEmpty else { return nil }
-        return URL(string: "https://image.tmdb.org/t/p/w185\(posterPath)") // Smaller poster size
+        return URL(string: "https://image.tmdb.org/t/p/w500\(posterPath)") // Higher resolution poster
     }
     
     var backdropURL: URL? {
         guard let backdropPath = backdropPath, !backdropPath.isEmpty else { return nil }
-        return URL(string: "https://image.tmdb.org/t/p/w500\(backdropPath)") // Smaller backdrop size
+        return URL(string: "https://image.tmdb.org/t/p/w780\(backdropPath)") // Higher resolution backdrop
     }
     
-    // High-quality URLs for detail views (when needed)
+    // Ultra high-quality URLs for detail views
     var posterURLHighRes: URL? {
         guard let posterPath = posterPath, !posterPath.isEmpty else { return nil }
-        return URL(string: "https://image.tmdb.org/t/p/w342\(posterPath)")
+        return URL(string: "https://image.tmdb.org/t/p/w780\(posterPath)")
     }
     
     var backdropURLHighRes: URL? {
         guard let backdropPath = backdropPath, !backdropPath.isEmpty else { return nil }
-        return URL(string: "https://image.tmdb.org/t/p/w780\(backdropPath)")
+        return URL(string: "https://image.tmdb.org/t/p/original\(backdropPath)")
     }
 }
 

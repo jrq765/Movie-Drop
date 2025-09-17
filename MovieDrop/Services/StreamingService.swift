@@ -87,8 +87,6 @@ class StreamingService: ObservableObject {
     /// Published cache for total counts
     @Published private(set) var streamingCountsByMovieId: [Int: (flatrate: Int, rent: Int, buy: Int)] = [:]
     
-    /// Published simplified counts for SwiftUI
-    @Published private(set) var streamingCounts: [Int: Int] = [:]
     
     /// Track fetch operations in progress to avoid duplicates
     private var fetchInProgress: Set<Int> = []
@@ -127,7 +125,8 @@ class StreamingService: ObservableObject {
     private var cachedAvailability: [Int: [StreamingPlatform]] = [:]
 
     private func fetchAvailability(movieId: Int, movieTitle: String) {
-        guard let url = URL(string: "\(baseURL)/streaming/\(movieId)?region=US&kind=flatrate&primaryOnly=true") else { return }
+        // Fetch all types of streaming options (flatrate, rent, buy)
+        guard let url = URL(string: "\(baseURL)/streaming/\(movieId)?region=US&kind=flatrate&primaryOnly=false&limit=8") else { return }
         var request = URLRequest(url: url)
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
@@ -208,14 +207,12 @@ class StreamingService: ObservableObject {
                         print("🎬 StreamingService: Updating cache for movie \(movieId) with \(streamingInfos.count) streaming options")
                         self.streamingByMovieId[movieId] = streamingInfos
                         self.streamingCountsByMovieId[movieId] = (flatrate: resp.counts.flatrate, rent: resp.counts.rent, buy: resp.counts.buy)
-                        self.streamingCounts[movieId] = resp.counts.flatrate + resp.counts.rent + resp.counts.buy
                         print("🎬 StreamingService: Cache updated. Total cached movies: \(self.streamingByMovieId.keys.count)")
                     } else {
                         print("🎬 StreamingService: No streaming options found for movie \(movieId)")
                         // Cache empty result to avoid repeated requests
                         self.streamingByMovieId[movieId] = []
                         self.streamingCountsByMovieId[movieId] = (flatrate: 0, rent: 0, buy: 0)
-                        self.streamingCounts[movieId] = 0
                     }
                 }
             } catch {

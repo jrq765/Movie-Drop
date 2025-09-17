@@ -392,15 +392,6 @@ struct MovieDetailView: View {
                             
                             Spacer()
                             
-                            if let totalCount = getStreamingCount(for: movie), totalCount > 0 {
-                                Text("\(totalCount) options")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 4)
-                                    .background(Color.gray.opacity(0.2))
-                                    .cornerRadius(8)
-                            }
                         }
 
                         let streamingInfo = streamingService.getStreamingInfo(for: movie)
@@ -465,29 +456,37 @@ struct MovieDetailView: View {
         // Universal link with cache-busting to refresh iMessage preview
         let movieURL = "https://moviedrop.app/m/\(movie.id)?region=US&v=2"
         
-        // Create rich card text
-        var message = createMovieCard()
-        message += "\n\n🔗 Open: \(movieURL)"
-        
-        // Include direct provider links if we already have them
-        let links = streamingService.getStreamingInfo(for: movie)
-        if !links.isEmpty {
-            let top = links.prefix(3)
-            message += "\n\nWhere to watch:"
-            for info in top {
-                message += "\n• \(info.platform): \(info.url)"
+        // Create visual movie card
+        Task {
+            let movieCardImage = await createMovieCardImage()
+            
+            await MainActor.run {
+                var items: [Any] = []
+                
+                // Add the visual card if we have it
+                if let cardImage = movieCardImage {
+                    items.append(cardImage)
+                }
+                
+                // Add the URL
+                if let url = URL(string: movieURL) {
+                    items.append(url)
+                }
+                
+                // Add text fallback
+                let message = createMovieCardText()
+                items.append(message)
+                
+                let activityVC = UIActivityViewController(activityItems: items, applicationActivities: nil)
+                if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                   let window = windowScene.windows.first {
+                    window.rootViewController?.present(activityVC, animated: true)
+                }
             }
-        }
-        
-        let items: [Any] = [message, URL(string: movieURL)!]
-        let activityVC = UIActivityViewController(activityItems: items, applicationActivities: nil)
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-           let window = windowScene.windows.first {
-            window.rootViewController?.present(activityVC, animated: true)
         }
     }
     
-    private func createMovieCard() -> String {
+    private func createMovieCardText() -> String {
         var card = "🎬 \(movie.title)\n"
         if let releaseDate = movie.releaseDate {
             card += "📅 \(releaseDate)\n"
@@ -497,6 +496,84 @@ struct MovieDetailView: View {
         }
         card += "\n🔍 Found with MovieDrop"
         return card
+    }
+    
+    private func createMovieCardImage() async -> UIImage? {
+        // Create a visual movie card similar to the iMessage extension
+        let cardSize = CGSize(width: 400, height: 600)
+        let renderer = UIGraphicsImageRenderer(size: cardSize)
+        
+        return await withCheckedContinuation { continuation in
+            DispatchQueue.global(qos: .userInitiated).async {
+                let image = renderer.image { context in
+                    let cgContext = context.cgContext
+                    
+                    // Background gradient
+                    let colors = [UIColor.systemBackground.cgColor, UIColor.systemGray6.cgColor]
+                    let gradient = CGGradient(colorsSpace: CGColorSpaceCreateDeviceRGB(), colors: colors as CFArray, locations: [0.0, 1.0])!
+                    cgContext.drawLinearGradient(gradient, start: CGPoint(x: 0, y: 0), end: CGPoint(x: 0, y: cardSize.height), options: [])
+                    
+                    // Load and draw poster
+                    if let posterURL = self.movie.posterURL {
+                        do {
+                            let posterData = try Data(contentsOf: posterURL)
+                            if let posterImage = UIImage(data: posterData) {
+                                let posterRect = CGRect(x: 50, y: 50, width: 300, height: 450)
+                                posterImage.draw(in: posterRect)
+                                
+                                // Add rounded corners to poster
+                                cgContext.setFillColor(UIColor.systemBackground.cgColor)
+                                cgContext.fillEllipse(in: CGRect(x: 45, y: 45, width: 310, height: 460))
+                                posterImage.draw(in: posterRect)
+                            }
+                        } catch {
+                            // Fallback: draw placeholder
+                            let placeholderRect = CGRect(x: 50, y: 50, width: 300, height: 450)
+                            cgContext.setFillColor(UIColor.systemGray4.cgColor)
+                            cgContext.fill(placeholderRect)
+                        }
+                    }
+                    
+                    // Add title
+                    let titleFont = UIFont.boldSystemFont(ofSize: 24)
+                    let titleAttributes: [NSAttributedString.Key: Any] = [
+                        .font: titleFont,
+                        .foregroundColor: UIColor.label
+                    ]
+                    let titleText = NSAttributedString(string: self.movie.title, attributes: titleAttributes)
+                    let titleSize = titleText.size()
+                    let titleRect = CGRect(x: (cardSize.width - titleSize.width) / 2, y: 520, width: titleSize.width, height: titleSize.height)
+                    titleText.draw(in: titleRect)
+                    
+                    // Add year
+                    if let releaseDate = self.movie.releaseDate, releaseDate.count >= 4 {
+                        let year = String(releaseDate.prefix(4))
+                        let yearFont = UIFont.systemFont(ofSize: 18)
+                        let yearAttributes: [NSAttributedString.Key: Any] = [
+                            .font: yearFont,
+                            .foregroundColor: UIColor.secondaryLabel
+                        ]
+                        let yearText = NSAttributedString(string: year, attributes: yearAttributes)
+                        let yearSize = yearText.size()
+                        let yearRect = CGRect(x: (cardSize.width - yearSize.width) / 2, y: 550, width: yearSize.width, height: yearSize.height)
+                        yearText.draw(in: yearRect)
+                    }
+                    
+                    // Add MovieDrop branding
+                    let brandFont = UIFont.systemFont(ofSize: 14)
+                    let brandAttributes: [NSAttributedString.Key: Any] = [
+                        .font: brandFont,
+                        .foregroundColor: UIColor.tertiaryLabel
+                    ]
+                    let brandText = NSAttributedString(string: "Shared via MovieDrop", attributes: brandAttributes)
+                    let brandSize = brandText.size()
+                    let brandRect = CGRect(x: (cardSize.width - brandSize.width) / 2, y: 570, width: brandSize.width, height: brandSize.height)
+                    brandText.draw(in: brandRect)
+                }
+                
+                continuation.resume(returning: image)
+            }
+        }
     }
 }
 
@@ -606,12 +683,6 @@ struct StreamingInfoCard: View {
     }
 }
 
-// MARK: - Helper Functions
-extension ContentView {
-    private func getStreamingCount(for movie: Movie) -> Int? {
-        return streamingService.streamingCounts[movie.id]
-    }
-}
 
 // Keep the old button for backward compatibility
 struct StreamingInfoButton: View {

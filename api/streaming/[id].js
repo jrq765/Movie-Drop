@@ -9,7 +9,7 @@ module.exports = async function handler(req, res) {
     const region = req.query.region || 'US';
     const kind = req.query.kind || 'flatrate';
     const primaryOnly = req.query.primaryOnly === 'true';
-    const limit = primaryOnly ? 1 : Math.min(parseInt(req.query.limit) || 6, 6);
+    const limit = primaryOnly ? 1 : Math.min(parseInt(req.query.limit) || 8, 12);
     
     if (!id) {
       return res.status(400).json({ error: 'Movie ID is required' });
