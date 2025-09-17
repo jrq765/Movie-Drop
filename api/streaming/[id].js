@@ -110,6 +110,9 @@ function getDirectUrl(providerId, movieTitle) {
     case 3: return `https://play.google.com/store/search?q=${encodedTitle}&c=movies`;
     case 7: return `https://www.vudu.com/content/movies/search?q=${encodedTitle}`;
     case 538: return `https://watch.plex.tv/search?q=${encodedTitle}`;
+    case 257: return `https://www.fubo.tv/search?q=${encodedTitle}`;
+    case 1825: return `https://www.amazon.com/Prime-Video/b?node=2676882011&search=${encodedTitle}`;
+    case 486: return `https://www.spectrum.net/ondemand/search?q=${encodedTitle}`;
     default: return null;
   }
 }
