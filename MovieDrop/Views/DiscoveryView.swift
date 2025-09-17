@@ -153,7 +153,9 @@ struct DiscoveryView: View {
                                     impactFeedback.impactOccurred()
                                     
                                     withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
-                                        passMovie()
+                                        if currentIndex < movies.count {
+                                            passMovie(movies[currentIndex])
+                                        }
                                     }
                         }) {
                             Image(systemName: "xmark")
@@ -182,7 +184,9 @@ struct DiscoveryView: View {
                                     impactFeedback.impactOccurred()
                                     
                                     withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
-                                        likeMovie()
+                                        if currentIndex < movies.count {
+                                            likeMovie(movies[currentIndex])
+                                        }
                                     }
                         }) {
                             Image(systemName: "heart.fill")
@@ -211,7 +215,9 @@ struct DiscoveryView: View {
                                     impactFeedback.impactOccurred()
                                     
                                     withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
-                                        addToWatchlist()
+                                        if currentIndex < movies.count {
+                                            addToWatchlist(movies[currentIndex])
+                                        }
                                     }
                             }) {
                                     Image(systemName: "bookmark.fill")
@@ -524,6 +530,95 @@ struct DiscoveryView: View {
         seenMovieIds.insert(id)
         saveSeenIds()
     }
+    
+    // MARK: - User Actions
+    private func likeMovie(_ movie: Movie) {
+        print("❤️ User liked: \(movie.title)")
+        
+        // Add to seen movies
+        seenMovieIds.insert(movie.id)
+        saveSeenIds()
+        
+        // Send signal to Railway for learning
+        Task {
+            await sendUserSignal(movieId: movie.id, action: "like")
+        }
+        
+        // Move to next movie
+        nextMovie()
+    }
+    
+    private func passMovie(_ movie: Movie) {
+        print("👎 User passed: \(movie.title)")
+        
+        // Add to seen movies
+        seenMovieIds.insert(movie.id)
+        saveSeenIds()
+        
+        // Send signal to Railway for learning
+        Task {
+            await sendUserSignal(movieId: movie.id, action: "dismiss")
+        }
+        
+        // Move to next movie
+        nextMovie()
+    }
+    
+    private func addToWatchlist(_ movie: Movie) {
+        print("📝 User added to watchlist: \(movie.title)")
+        
+        // Add to seen movies
+        seenMovieIds.insert(movie.id)
+        saveSeenIds()
+        
+        // Send signal to Railway for learning
+        Task {
+            await sendUserSignal(movieId: movie.id, action: "watchlist")
+        }
+        
+        // Add to watchlist via MovieService
+        Task {
+            if let user = authService.currentUser {
+                do {
+                    try await movieService.addToWatchlist(userId: user.id, movie: movie)
+                    print("✅ Added to watchlist successfully")
+                } catch {
+                    print("❌ Failed to add to watchlist: \(error)")
+                }
+            }
+        }
+        
+        // Move to next movie
+        nextMovie()
+    }
+    
+    private func sendUserSignal(movieId: Int, action: String) async {
+        guard let user = authService.currentUser else { return }
+        
+        do {
+            let signalData: [String: Any] = [
+                "userId": user.id,
+                "movieId": movieId,
+                "action": action,
+                "timestamp": Date().timeIntervalSince1970
+            ]
+            
+            guard let url = URL(string: "https://movie-drop-production.up.railway.app/signals") else { return }
+            
+            var request = URLRequest(url: url)
+            request.httpMethod = "POST"
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.httpBody = try JSONSerialization.data(withJSONObject: signalData)
+            
+            let (_, response) = try await URLSession.shared.data(for: request)
+            
+            if let httpResponse = response as? HTTPURLResponse {
+                print("📡 Signal sent: \(action) for movie \(movieId) - Status: \(httpResponse.statusCode)")
+            }
+        } catch {
+            print("❌ Failed to send signal: \(error)")
+        }
+    }
 }
 
 struct TinderMovieCard: View {
@@ -561,7 +656,7 @@ struct TinderMovieCard: View {
                 if !movieImages.isEmpty {
                     TabView(selection: $currentImageIndex) {
                         ForEach(0..<movieImages.count, id: \.self) { index in
-                            AsyncImage(url: movieImages[index]) { image in
+                            CachedAsyncImage(url: movieImages[index]) { image in
                 image
                     .resizable()
                                     .scaledToFill()
@@ -849,7 +944,7 @@ struct CommunityReviewsView: View {
                 VStack(alignment: .leading, spacing: 16) {
                     // Movie Header
                 HStack {
-                        AsyncImage(url: movie.posterURL) { image in
+                        CachedAsyncImage(url: movie.posterURL) { image in
                         image
                             .resizable()
                                 .scaledToFit()

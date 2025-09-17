@@ -110,13 +110,24 @@ struct Movie: Identifiable, Codable {
         communityReviews = try container.decodeIfPresent([String].self, forKey: .communityReviews) ?? camel?.decodeIfPresent([String].self, forKey: .communityReviews)
     }
 
-    // MARK: - Computed URLs
+    // MARK: - Computed URLs (Optimized for mobile performance)
     var posterURL: URL? {
+        guard let posterPath = posterPath, !posterPath.isEmpty else { return nil }
+        return URL(string: "https://image.tmdb.org/t/p/w185\(posterPath)") // Smaller poster size
+    }
+    
+    var backdropURL: URL? {
+        guard let backdropPath = backdropPath, !backdropPath.isEmpty else { return nil }
+        return URL(string: "https://image.tmdb.org/t/p/w500\(backdropPath)") // Smaller backdrop size
+    }
+    
+    // High-quality URLs for detail views (when needed)
+    var posterURLHighRes: URL? {
         guard let posterPath = posterPath, !posterPath.isEmpty else { return nil }
         return URL(string: "https://image.tmdb.org/t/p/w342\(posterPath)")
     }
     
-    var backdropURL: URL? {
+    var backdropURLHighRes: URL? {
         guard let backdropPath = backdropPath, !backdropPath.isEmpty else { return nil }
         return URL(string: "https://image.tmdb.org/t/p/w780\(backdropPath)")
     }
