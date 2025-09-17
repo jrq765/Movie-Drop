@@ -112,8 +112,12 @@ class StreamingService: ObservableObject {
 
     /// Get streaming info with direct links when available
     func getStreamingInfo(for movie: Movie) -> [StreamingInfo] {
-        if let cached = streamingByMovieId[movie.id] { return cached }
+        if let cached = streamingByMovieId[movie.id] { 
+            print("🎬 StreamingService: Returning cached data for movie \(movie.id): \(cached.count) options")
+            return cached 
+        }
         // Trigger fetch; return empty for first render (no placeholders)
+        print("🎬 StreamingService: No cached data for movie \(movie.id), triggering fetch")
         fetchAvailability(movieId: movie.id, movieTitle: movie.title)
         return []
     }
@@ -125,8 +129,22 @@ class StreamingService: ObservableObject {
         guard let url = URL(string: "\(baseURL)/streaming/\(movieId)?region=US") else { return }
         var request = URLRequest(url: url)
         request.setValue("application/json", forHTTPHeaderField: "Accept")
-        URLSession.shared.dataTask(with: request) { [weak self] data, _, _ in
-            guard let self = self, let data = data else { return }
+        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
+            guard let self = self else { return }
+            
+            if let error = error {
+                print("🎬 StreamingService: Network error for movie \(movieId): \(error.localizedDescription)")
+                return
+            }
+            
+            guard let data = data else {
+                print("🎬 StreamingService: No data received for movie \(movieId)")
+                return
+            }
+            
+            if let httpResponse = response as? HTTPURLResponse {
+                print("🎬 StreamingService: HTTP \(httpResponse.statusCode) for movie \(movieId)")
+            }
             
             // Handle local backend format
             struct LocalResponse: Decodable {
@@ -141,7 +159,8 @@ class StreamingService: ObservableObject {
                 let kind: String?
             }
             
-            if let resp = try? JSONDecoder().decode(LocalResponse.self, from: data) {
+            do {
+                let resp = try JSONDecoder().decode(LocalResponse.self, from: data)
                 print("🎬 StreamingService: Fetched data for movie \(movieId)")
                 print("🎬 StreamingService: Flatrate providers: \(resp.flatrate?.count ?? 0)")
                 print("🎬 StreamingService: Purchase providers: \(resp.purchase?.count ?? 0)")
@@ -174,8 +193,17 @@ class StreamingService: ObservableObject {
                 
                 if !streamingInfos.isEmpty {
                     DispatchQueue.main.async {
+                        print("🎬 StreamingService: Updating cache for movie \(movieId) with \(streamingInfos.count) streaming options")
                         self.streamingByMovieId[movieId] = streamingInfos
+                        print("🎬 StreamingService: Cache updated. Total cached movies: \(self.streamingByMovieId.keys.count)")
                     }
+                } else {
+                    print("🎬 StreamingService: No streaming options found for movie \(movieId)")
+                }
+            } catch {
+                print("🎬 StreamingService: JSON decode error for movie \(movieId): \(error)")
+                if let dataString = String(data: data, encoding: .utf8) {
+                    print("🎬 StreamingService: Raw response: \(dataString)")
                 }
             }
         }.resume()
