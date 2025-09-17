@@ -392,7 +392,7 @@ struct MovieDetailView: View {
                             
                             Spacer()
                             
-                            if let totalCount = streamingService.streamingCounts[movie.id], totalCount > 0 {
+                            if let totalCount = getStreamingCount(for: movie), totalCount > 0 {
                                 Text("\(totalCount) options")
                                     .font(.caption)
                                     .foregroundColor(.secondary)
@@ -603,6 +603,13 @@ struct StreamingInfoCard: View {
         if UIApplication.shared.canOpenURL(url) {
             UIApplication.shared.open(url)
         }
+    }
+}
+
+// MARK: - Helper Functions
+extension ContentView {
+    private func getStreamingCount(for movie: Movie) -> Int? {
+        return streamingService.streamingCounts[movie.id]
     }
 }
 
