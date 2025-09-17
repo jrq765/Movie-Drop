@@ -7,6 +7,8 @@ require('dotenv').config();
 const authRoutes = require('./routes/auth');
 const movieRoutes = require('./routes/movies');
 const streamingRoutes = require('./routes/streaming');
+const signalsRoutes = require('./routes/signals');
+const recommendRoutes = require('./routes/recommend');
 const { initializeDatabase } = require('./config/database');
 
 const app = express();
@@ -45,6 +47,8 @@ app.get('/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/movies', movieRoutes);
 app.use('/api/streaming', streamingRoutes);
+app.use('/signals', signalsRoutes);
+app.use('/recommend', recommendRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
