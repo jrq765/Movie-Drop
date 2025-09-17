@@ -82,19 +82,17 @@ enum MessageComposer {
         message.layout = layout
         message.summaryText = "\(card.title)\(layout.imageSubtitle?.isEmpty == false ? " • \(layout.imageSubtitle!)" : "")"
 
-        // Set the message URL to the custom app scheme to open the main app
-        if let appSchemeURL = URL(string: "moviedrop://movie/\(card.id)") {
-            message.url = appSchemeURL
-            print("🔗 MessageComposer: Set message URL to app scheme: \(appSchemeURL.absoluteString)")
+        // Set the message URL to Universal Link - opens app if installed, web page if not
+        if let universalURL = buildURL(base: universalBaseURL, movieId: card.id, region: region) {
+            message.url = universalURL
+            print("🔗 MessageComposer: Set message URL to Universal Link: \(universalURL.absoluteString)")
         } else {
-            print("❌ MessageComposer: Failed to build app scheme URL for movie \(card.id)")
+            print("❌ MessageComposer: Failed to build Universal Link for movie \(card.id)")
         }
         
-        // Include the web universal link in the caption as a fallback
-        if let webURL = buildURL(base: universalBaseURL, movieId: card.id, region: region) {
-            let overviewText = (card.overview?.isEmpty == false ? card.overview! : "Shared via MovieDrop")
-            layout.caption = overviewText + "\n🔗 Open in browser: \(webURL.absoluteString)"
-        }
+        // Set the caption with movie overview
+        let overviewText = (card.overview?.isEmpty == false ? card.overview! : "Shared via MovieDrop")
+        layout.caption = overviewText
         return message
     }
 }
