@@ -7,12 +7,18 @@ class AuthService: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage: String?
     
-    private let baseURL = "https://movie-drop-c0oubcxt9-jr-quints-projects.vercel.app/api"
+    private let baseURL = "http://192.168.0.31:3000/api"
     private var cancellables = Set<AnyCancellable>()
     
     init() {
+        // For development: auto-authenticate with a dummy user
+        #if DEBUG
+        isAuthenticated = true
+        currentUser = User(id: 1, email: "dev@moviedrop.app", displayName: "Developer")
+        #else
         // Check if user is already logged in
         checkAuthStatus()
+        #endif
     }
     
     // MARK: - Authentication Status

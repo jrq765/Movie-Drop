@@ -1,19 +1,9 @@
 import Foundation
 
 struct User: Codable, Identifiable {
-    let id: String
+    let id: Int
     let email: String
     let displayName: String
-    let createdAt: String
-    let avatar: String?
-    let bio: String
-    let preferences: UserPreferences
-    
-    struct UserPreferences: Codable {
-        let favoriteGenres: [String]
-        let notifications: Bool
-        let privacy: String // 'public', 'friends', 'private'
-    }
 }
 
 struct AuthResponse: Codable {

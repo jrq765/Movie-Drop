@@ -1,16 +1,23 @@
 {
-  "version": 2,
-  "builds": [
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "headers": [
     {
-      "src": "api/**/*.js",
-      "use": "@vercel/node"
+      "source": "/.well-known/apple-app-site-association",
+      "headers": [
+        { "key": "Content-Type", "value": "application/json" },
+        { "key": "Cache-Control", "value": "public, max-age=300, s-maxage=300, stale-while-revalidate=600" }
+      ]
     }
   ],
-  "redirects": [
+  "rewrites": [
     {
       "source": "/m/:id",
-      "destination": "https://moviedrop.framer.website/m/:id",
-      "permanent": false
+      "destination": "/api/m/:id"
+    },
+    {
+      "source": "/.well-known/apple-app-site-association",
+      "destination": "/api/.well-known/apple-app-site-association"
     }
   ]
 }

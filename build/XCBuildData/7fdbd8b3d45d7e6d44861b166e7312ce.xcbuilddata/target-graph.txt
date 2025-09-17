@@ -1,0 +1,4 @@
+Target dependency graph (2 targets)
+Target 'MovieDrop' in project 'MovieDrop'
+➜ Explicit dependency on target 'MovieDropMessageExtension' in project 'MovieDrop'
+Target 'MovieDropMessageExtension' in project 'MovieDrop' (no dependencies)

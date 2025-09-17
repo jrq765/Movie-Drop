@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		A1234567890ABCDEF001 /* MovieDropApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1234567890ABCDEF000 /* MovieDropApp.swift */; };
 		A1234567890ABCDEF003 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1234567890ABCDEF002 /* ContentView.swift */; };
-		A1234567890ABCDEF040 /* IntroView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1234567890ABCDEF041 /* IntroView.swift */; };
 		A1234567890ABCDEF005 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A1234567890ABCDEF004 /* Assets.xcassets */; };
 		A1234567890ABCDEF008 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A1234567890ABCDEF007 /* Preview Assets.xcassets */; };
 		A1234567890ABCDEF00A /* MovieDropMessageExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = A1234567890ABCDEF009 /* MovieDropMessageExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -21,11 +20,13 @@
 		A1234567890ABCDEF036 /* MovieService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1234567890ABCDEF03A /* MovieService.swift */; };
 		A1234567890ABCDEF03B /* StreamingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1234567890ABCDEF03C /* StreamingService.swift */; };
 		A1234567890ABCDEF03D /* StreamingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1234567890ABCDEF03E /* StreamingService.swift */; };
+		A1234567890ABCDEF040 /* IntroView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1234567890ABCDEF041 /* IntroView.swift */; };
 		A1234567890ABCDEF042 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1234567890ABCDEF043 /* User.swift */; };
 		A1234567890ABCDEF044 /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1234567890ABCDEF045 /* AuthService.swift */; };
 		A1234567890ABCDEF046 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1234567890ABCDEF047 /* LoginView.swift */; };
 		A1234567890ABCDEF048 /* RegisterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1234567890ABCDEF049 /* RegisterView.swift */; };
 		A1234567890ABCDEF04A /* DiscoveryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1234567890ABCDEF04B /* DiscoveryView.swift */; };
+		A1234567890ABCDEF04E /* WatchlistView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1234567890ABCDEF04F /* WatchlistView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -55,7 +56,6 @@
 /* Begin PBXFileReference section */
 		A1234567890ABCDEF000 /* MovieDropApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovieDropApp.swift; sourceTree = "<group>"; };
 		A1234567890ABCDEF002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		A1234567890ABCDEF041 /* IntroView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntroView.swift; sourceTree = "<group>"; };
 		A1234567890ABCDEF004 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A1234567890ABCDEF007 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		A1234567890ABCDEF009 /* MovieDropMessageExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = MovieDropMessageExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -70,11 +70,13 @@
 		A1234567890ABCDEF03A /* MovieService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovieService.swift; sourceTree = "<group>"; };
 		A1234567890ABCDEF03C /* StreamingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamingService.swift; sourceTree = "<group>"; };
 		A1234567890ABCDEF03E /* StreamingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamingService.swift; sourceTree = "<group>"; };
+		A1234567890ABCDEF041 /* IntroView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntroView.swift; sourceTree = "<group>"; };
 		A1234567890ABCDEF043 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		A1234567890ABCDEF045 /* AuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthService.swift; sourceTree = "<group>"; };
 		A1234567890ABCDEF047 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		A1234567890ABCDEF049 /* RegisterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterView.swift; sourceTree = "<group>"; };
 		A1234567890ABCDEF04B /* DiscoveryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoveryView.swift; sourceTree = "<group>"; };
+		A1234567890ABCDEF04F /* WatchlistView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchlistView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -191,6 +193,7 @@
 				A1234567890ABCDEF047 /* LoginView.swift */,
 				A1234567890ABCDEF049 /* RegisterView.swift */,
 				A1234567890ABCDEF04B /* DiscoveryView.swift */,
+				A1234567890ABCDEF04F /* WatchlistView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -307,6 +310,7 @@
 				A1234567890ABCDEF046 /* LoginView.swift in Sources */,
 				A1234567890ABCDEF048 /* RegisterView.swift in Sources */,
 				A1234567890ABCDEF04A /* DiscoveryView.swift in Sources */,
+				A1234567890ABCDEF04E /* WatchlistView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -523,6 +527,9 @@
 				INFOPLIST_FILE = MovieDropMessageExtension/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = MovieDrop;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_UIRequiredDeviceCapabilities = armv7;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -550,6 +557,9 @@
 				INFOPLIST_FILE = MovieDropMessageExtension/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = MovieDrop;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_UIRequiredDeviceCapabilities = armv7;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

@@ -25,6 +25,11 @@ struct MovieDropApp: App {
                     .onOpenURL { url in
                         handleURL(url)
                     }
+                    .onContinueUserActivity(NSUserActivityTypeBrowsingWeb) { activity in
+                        if let url = activity.webpageURL {
+                            handleURL(url)
+                        }
+                    }
             } else {
                 LoginView()
                     .environmentObject(authService)
@@ -60,4 +65,6 @@ struct MovieDropApp: App {
 
 class AppState: ObservableObject {
     @Published var selectedMovieId: String? = nil
+    // Bump this to signal a full Discover reset across views
+    @Published var resetDiscoverTick: Int = 0
 }

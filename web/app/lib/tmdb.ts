@@ -22,27 +22,8 @@ interface WatchProvidersResponse {
   buy?: WatchProvider[]
 }
 
-const TMDB_API_KEY = process.env.TMDB_API_KEY
-const TMDB_BASE_URL = 'https://api.themoviedb.org/3'
+const MOVIEDROP_API_BASE = process.env.MOVIEDROP_API_BASE || 'https://perceptive-flow-production.up.railway.app/api'
 export const TMDB_IMAGE_BASE = process.env.TMDB_IMAGE_BASE ?? "https://image.tmdb.org/t/p"
-
-if (!TMDB_API_KEY) {
-  console.error(`
-❌ TMDB_API_KEY environment variable is missing!
-
-RESTORATION CHECKLIST:
-1. Set TMDB_API_KEY in your environment variables
-2. Get your API key from: https://www.themoviedb.org/settings/api
-3. Add to .env.local: TMDB_API_KEY=your_api_key_here
-4. Optional: Set NEXT_PUBLIC_REGION_DEFAULT=US
-5. Optional: Set TMDB_IMAGE_BASE=https://image.tmdb.org/t/p
-
-Test with curl:
-curl "https://api.themoviedb.org/3/movie/550?api_key=YOUR_KEY"
-curl "https://api.themoviedb.org/3/movie/550/watch/providers?api_key=YOUR_KEY"
-`)
-  throw new Error('TMDB_API_KEY environment variable is required')
-}
 
 export function posterUrl(path?: string, size: "w500"|"w780"|"original"="w780"): string | null {
   return path ? `${TMDB_IMAGE_BASE}/${size}${path}` : null
@@ -54,7 +35,7 @@ export function providerLogo(path?: string): string | null {
 
 export async function fetchMovie(id: string): Promise<MovieData> {
   const response = await fetch(
-    `${TMDB_BASE_URL}/movie/${id}?api_key=${TMDB_API_KEY}`,
+    `${MOVIEDROP_API_BASE}/movies/${id}`,
     {
       next: { revalidate: 3600 }, // Cache for 1 hour
     }
@@ -64,15 +45,7 @@ export async function fetchMovie(id: string): Promise<MovieData> {
     if (response.status === 404) {
       throw new Error('Movie not found')
     }
-    console.error(`
-❌ TMDB API request failed!
-
-RESTORATION CHECKLIST:
-1. Verify TMDB_API_KEY is correct
-2. Check API key permissions at: https://www.themoviedb.org/settings/api
-3. Test with curl: curl "https://api.themoviedb.org/3/movie/${id}?api_key=YOUR_KEY"
-4. Check rate limits (40 requests per 10 seconds)
-`)
+    console.error(`❌ MovieDrop API request failed: ${response.status}`)
     throw new Error(`Failed to fetch movie data: ${response.status}`)
   }
 
@@ -82,7 +55,7 @@ RESTORATION CHECKLIST:
 export async function fetchProviders(id: string, region: string = 'US'): Promise<WatchProvidersResponse | null> {
   try {
     const response = await fetch(
-      `${TMDB_BASE_URL}/movie/${id}/watch/providers?api_key=${TMDB_API_KEY}`,
+      `${MOVIEDROP_API_BASE}/streaming/${id}?region=${region}`,
       {
         next: { revalidate: 3600 }, // Cache for 1 hour
       }
@@ -94,11 +67,6 @@ export async function fetchProviders(id: string, region: string = 'US'): Promise
     }
 
     const data = await response.json()
-    const regionData = data.results[region]
-
-    if (!regionData) {
-      return null
-    }
 
     // Transform the data to include links (using JustWatch deep links)
     const transformProviders = (providers: any[]): WatchProvider[] => {
@@ -112,14 +80,14 @@ export async function fetchProviders(id: string, region: string = 'US'): Promise
 
     const result: WatchProvidersResponse = {}
 
-    if (regionData.flatrate) {
-      result.flatrate = transformProviders(regionData.flatrate)
+    if (data.flatrate) {
+      result.flatrate = transformProviders(data.flatrate)
     }
-    if (regionData.rent) {
-      result.rent = transformProviders(regionData.rent)
+    if (data.rent) {
+      result.rent = transformProviders(data.rent)
     }
-    if (regionData.buy) {
-      result.buy = transformProviders(regionData.buy)
+    if (data.buy) {
+      result.buy = transformProviders(data.buy)
     }
 
     return result

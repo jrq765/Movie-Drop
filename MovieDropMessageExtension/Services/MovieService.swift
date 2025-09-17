@@ -23,10 +23,9 @@ class MovieService: ObservableObject {
             }
         }
         
-        // Use TMDB API directly
-        let tmdbApiKey = Bundle.main.object(forInfoDictionaryKey: "TMDB_API_KEY") as? String ?? ""
+        // Use backend API
         guard let encodedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
-              let url = URL(string: "https://api.themoviedb.org/3/search/movie?api_key=\(tmdbApiKey)&query=\(encodedQuery)&language=en-US") else {
+              let url = URL(string: "\(baseURL)/movies/search?query=\(encodedQuery)") else {
             print("❌ Invalid URL for query: \(query)")
             completion(.failure(MovieServiceError.invalidURL))
             return
@@ -198,7 +197,8 @@ class MovieService: ObservableObject {
                 let movieCard = MovieCard(
                     movie: movie,
                     streamingInfo: streamingInfo,
-                    shareURL: "https://moviedrop.app/m/\(movie.id)",
+                    // Add cache-busting param to refresh iMessage preview for stale links
+                    shareURL: "https://moviedrop.app/m/\(movie.id)?region=US&v=2",
                     createdAt: Date()
                 )
                 completion(.success(movieCard))

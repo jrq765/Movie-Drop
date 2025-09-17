@@ -2,23 +2,22 @@ import Foundation
 
 class MovieService: ObservableObject {
     private var baseURL: String {
-        return Bundle.main.object(forInfoDictionaryKey: "MOVIEDROP_API_BASE_URL") as? String ?? "https://movie-drop-c0oubcxt9-jr-quints-projects.vercel.app/api"
+        return Bundle.main.object(forInfoDictionaryKey: "MOVIEDROP_API_BASE_URL") as? String ?? "https://moviedrop.app/api"
     }
     
     func searchMovies(query: String) async throws -> [Movie] {
         print("🔍 MovieService: Starting search for '\(query)'")
         
-        // Use TMDB API directly
-        let tmdbApiKey = Bundle.main.object(forInfoDictionaryKey: "TMDB_API_KEY") as? String ?? ""
+        // Use backend API
         guard let encodedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
-              let url = URL(string: "https://api.themoviedb.org/3/search/movie?api_key=\(tmdbApiKey)&query=\(encodedQuery)&language=en-US") else {
+              let url = URL(string: "\(baseURL)/movies/search?query=\(encodedQuery)") else {
             print("❌ MovieService: Invalid URL")
             throw MovieServiceError.invalidURL
         }
         
         print("🌐 MovieService: Making request to \(url)")
         
-        var request = URLRequest(url: url, cachePolicy: .useProtocolCachePolicy, timeoutInterval: 15)
+        var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 15)
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         
         do {
@@ -31,7 +30,7 @@ class MovieService: ObservableObject {
             let tmdbResponse = try JSONDecoder().decode(TMDBMovieResponse.self, from: data)
             print("✅ MovieService: Successfully decoded \(tmdbResponse.results.count) movies")
             
-            // TMDB results are already Movie objects, no conversion needed
+            // Backend returns TMDB format, so results are already Movie objects
             let movies = tmdbResponse.results
             
             // Debug: Print all movies and their poster paths
@@ -78,7 +77,7 @@ class MovieService: ObservableObject {
             throw MovieServiceError.invalidURL
         }
         
-        var request = URLRequest(url: url, cachePolicy: .useProtocolCachePolicy, timeoutInterval: 15)
+        var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 15)
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         
         do {
@@ -99,30 +98,191 @@ class MovieService: ObservableObject {
     }
     
     // MARK: - Popular Movies for Discovery
-    func fetchPopularMovies() async throws -> [Movie] {
-        guard let url = URL(string: "\(baseURL)/popular") else {
+    func getPopularMovies(excludeIds: [Int] = []) async throws -> [Movie] {
+        print("🔍 MovieService: Getting randomized popular movies")
+        let timestamp = Int(Date().timeIntervalSince1970)
+        let randomId = Int.random(in: 1000...9999)
+        var urlString = "\(baseURL)/movies/popular?randomize=true&t=\(timestamp)&r=\(randomId)"
+        if !excludeIds.isEmpty {
+            let csv = excludeIds.map(String.init).joined(separator: ",")
+            urlString += "&exclude=\(csv)"
+        }
+        print("🔗 MovieService: Calling URL: \(urlString)")
+        guard let url = URL(string: urlString) else {
+            print("❌ MovieService: Invalid URL for popular movies")
             throw MovieServiceError.invalidURL
         }
         
-        var request = URLRequest(url: url)
-        request.cachePolicy = .useProtocolCachePolicy
-        request.timeoutInterval = 15
+        var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 15)
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
         
         do {
-            let (data, _) = try await URLSession.shared.data(for: request)
+            let (data, response) = try await URLSession.shared.data(for: request)
             
-            struct PopularResponse: Codable {
-                let results: [Movie]
+            if let httpResponse = response as? HTTPURLResponse {
+                print("📡 MovieService: HTTP Status for popular movies: \(httpResponse.statusCode)")
             }
             
-            let response = try JSONDecoder().decode(PopularResponse.self, from: data)
-            print("✅ MovieService: Successfully got \(response.results.count) popular movies")
-            
-            return response.results
+            let tmdbResponse = try JSONDecoder().decode(TMDBMovieResponse.self, from: data)
+            let filtered = tmdbResponse.results.filter { $0.posterPath != nil && $0.posterPath != "" && $0.posterPath != "null" }
+            print("✅ MovieService: Got \(filtered.count) randomized popular movies")
+            return filtered
         } catch {
             print("❌ MovieService: Error getting popular movies - \(error)")
             throw error
         }
+    }
+    
+    func fetchPopularMovies() async throws -> [Movie] {
+        return try await getPopularMovies()
+    }
+    
+    // MARK: - Recommendations
+    func getRecommendations(userId: Int) async throws -> [Movie] {
+        print("🎯 MovieService: Getting recommendations for user \(userId)")
+        
+        let timestamp = Int(Date().timeIntervalSince1970)
+        let randomId = Int.random(in: 1000...9999)
+        let urlString = "\(baseURL)/movies/recommendations/\(userId)?limit=20&t=\(timestamp)&r=\(randomId)"
+        print("🔗 MovieService: Calling recommendations URL: \(urlString)")
+        guard let url = URL(string: urlString) else {
+            print("❌ MovieService: Invalid URL for recommendations")
+            throw MovieServiceError.invalidURL
+        }
+        
+        var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 15)
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+            
+            if let httpResponse = response as? HTTPURLResponse {
+                print("📡 MovieService: HTTP Status for recommendations: \(httpResponse.statusCode)")
+                if httpResponse.statusCode != 200 {
+                    throw MovieServiceError.networkError
+                }
+            }
+            
+            let tmdbResponse = try JSONDecoder().decode(TMDBMovieResponse.self, from: data)
+            print("✅ MovieService: Got \(tmdbResponse.results.count) recommendations")
+            return tmdbResponse.results
+        } catch {
+            print("❌ MovieService: Failed to get recommendations: \(error)")
+            throw error
+        }
+    }
+    
+    // MARK: - Watchlist Functions
+    func addToWatchlist(userId: Int, movie: Movie) async throws {
+        print("📝 MovieService: Adding \(movie.title) to watchlist for user \(userId)")
+        
+        guard let url = URL(string: "\(baseURL)/movies/watchlist") else {
+            print("❌ MovieService: Invalid URL for watchlist")
+            throw MovieServiceError.invalidURL
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        
+        let watchlistData: [String: Any] = [
+            "userId": userId,
+            "movieId": movie.id,
+            "movieTitle": movie.title,
+            "moviePoster": movie.posterPath ?? ""
+        ]
+        
+        do {
+            request.httpBody = try JSONSerialization.data(withJSONObject: watchlistData)
+            
+            let (_, response) = try await URLSession.shared.data(for: request)
+            
+            if let httpResponse = response as? HTTPURLResponse {
+                print("📡 MovieService: HTTP Status for watchlist add: \(httpResponse.statusCode)")
+                if httpResponse.statusCode != 200 {
+                    throw MovieServiceError.networkError
+                }
+            }
+            
+            print("✅ MovieService: Successfully added \(movie.title) to watchlist")
+        } catch {
+            print("❌ MovieService: Error adding to watchlist - \(error)")
+            throw error
+        }
+    }
+    
+    func getWatchlist(userId: Int) async throws -> [Movie] {
+        print("📋 MovieService: Getting watchlist for user \(userId)")
+        
+        guard let url = URL(string: "\(baseURL)/movies/watchlist/\(userId)") else {
+            print("❌ MovieService: Invalid URL for watchlist")
+            throw MovieServiceError.invalidURL
+        }
+        
+        var request = URLRequest(url: url)
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+            
+            if let httpResponse = response as? HTTPURLResponse {
+                print("📡 MovieService: HTTP Status for watchlist: \(httpResponse.statusCode)")
+            }
+            
+            let watchlistResponse = try JSONDecoder().decode(WatchlistResponse.self, from: data)
+            print("✅ MovieService: Successfully got \(watchlistResponse.movies.count) watchlist movies")
+            
+            // Convert watchlist items to Movie objects
+            let movies = watchlistResponse.movies.map { item in
+                Movie(
+                    id: item.movieId,
+                    title: item.movieTitle,
+                    overview: nil,
+                    posterPath: item.moviePoster,
+                    releaseDate: nil,
+                    voteAverage: nil,
+                    voteCount: nil,
+                    adult: nil,
+                    backdropPath: nil,
+                    genreIds: nil,
+                    originalLanguage: nil,
+                    originalTitle: nil,
+                    popularity: nil,
+                    video: nil
+                )
+            }
+            
+            return movies
+        } catch {
+            print("❌ MovieService: Error getting watchlist - \(error)")
+            throw error
+        }
+    }
+}
+
+// MARK: - Watchlist Response Models
+struct WatchlistResponse: Codable {
+    let movies: [WatchlistMovie]
+}
+
+struct WatchlistMovie: Codable {
+    let id: Int
+    let userId: Int
+    let movieId: Int
+    let movieTitle: String
+    let moviePoster: String
+    let listType: String
+    let createdAt: String
+    
+    enum CodingKeys: String, CodingKey {
+        case id
+        case userId = "user_id"
+        case movieId = "movie_id"
+        case movieTitle = "movie_title"
+        case moviePoster = "movie_poster"
+        case listType = "list_type"
+        case createdAt = "created_at"
     }
 }
 
@@ -130,4 +290,5 @@ enum MovieServiceError: Error {
     case invalidURL
     case noData
     case decodingError
+    case networkError
 }

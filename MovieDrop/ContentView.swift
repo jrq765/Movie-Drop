@@ -11,6 +11,7 @@ struct ContentView: View {
     @State private var selectedMovie: Movie?
     @State private var showingMovieDetail = false
     @State private var searchTask: Task<Void, Never>? // For debouncing search requests
+    @State private var showingWatchlist = false
     
     var body: some View {
         TabView {
@@ -32,6 +33,10 @@ struct ContentView: View {
                             if let user = authService.currentUser {
                                 Text("Welcome, \(user.displayName)")
                                     .font(.headline)
+                            }
+                            
+                            Button("My Watchlist") {
+                                showingWatchlist = true
                             }
                             
                             Button("Logout") {
@@ -133,7 +138,7 @@ struct ContentView: View {
                     ScrollView {
                         LazyVStack(spacing: 16) {
                             ForEach(searchResults) { movie in
-                                MovieCardView(movie: movie) {
+                                SearchMovieCardView(movie: movie) {
                                     selectedMovie = movie
                                     showingMovieDetail = true
                                 }
@@ -157,6 +162,9 @@ struct ContentView: View {
                     if let movie = selectedMovie {
                         MovieDetailView(movie: movie, streamingService: streamingService)
                     }
+                }
+                .sheet(isPresented: $showingWatchlist) {
+                    WatchlistView()
                 }
                 .onChange(of: appState.selectedMovieId) { _, newMovieId in
                     if let movieId = newMovieId, let id = Int(movieId) {
@@ -260,7 +268,7 @@ struct ContentView: View {
     }
 }
 
-struct MovieCardView: View {
+struct SearchMovieCardView: View {
     let movie: Movie
     let onTap: () -> Void
     
@@ -329,7 +337,7 @@ struct MovieCardView: View {
 
 struct MovieDetailView: View {
     let movie: Movie
-    let streamingService: StreamingService
+    @ObservedObject var streamingService: StreamingService
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
@@ -374,15 +382,21 @@ struct MovieDetailView: View {
                         }
                     }
                     
-                    // Streaming Options
+                    // Streaming Options (use direct links from backend when available)
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Where to Watch")
                             .font(.title2)
                             .fontWeight(.semibold)
                             .foregroundColor(.primary)
-                        
-                        ForEach(streamingService.getAvailablePlatforms(for: movie), id: \.self) { platform in
-                            StreamingButton(platform: platform, movie: movie, streamingService: streamingService)
+
+                        ForEach(streamingService.getStreamingInfo(for: movie), id: \.url) { info in
+                            StreamingInfoButton(info: info)
+                        }
+                        // Show a subtle note when no links yet
+                        if streamingService.getStreamingInfo(for: movie).isEmpty {
+                            Text("Fetching direct links...")
+                                .font(.footnote)
+                                .foregroundColor(.secondary)
                         }
                     }
                     
@@ -416,33 +430,28 @@ struct MovieDetailView: View {
     }
     
     private func shareMovie() {
-        // Create the movie URL for the web version
-        let movieURL = "https://moviedrop.app/m/\(movie.id)"
+        // Universal link with cache-busting to refresh iMessage preview
+        let movieURL = "https://moviedrop.app/m/\(movie.id)?region=US&v=2"
         
-        // Create a rich movie card message
-        let movieCard = createMovieCard()
+        // Create rich card text
+        var message = createMovieCard()
+        message += "\n\n🔗 Open: \(movieURL)"
         
-        // Create the message content with the web URL
-        let messageContent = """
-        🎬 \(movie.title)
+        // Include direct provider links if we already have them
+        let links = streamingService.getStreamingInfo(for: movie)
+        if !links.isEmpty {
+            let top = links.prefix(3)
+            message += "\n\nWhere to watch:"
+            for info in top {
+                message += "\n• \(info.platform): \(info.url)"
+            }
+        }
         
-        \(movieCard)
-        
-        Watch it here: \(movieURL)
-        
-        📱 Get the MovieDrop app for the best experience!
-        """
-        
-        // Use the native share sheet for better sharing options
-        let activityViewController = UIActivityViewController(
-            activityItems: [messageContent, URL(string: movieURL)!],
-            applicationActivities: nil
-        )
-        
-        // Present the share sheet
+        let items: [Any] = [message, URL(string: movieURL)!]
+        let activityVC = UIActivityViewController(activityItems: items, applicationActivities: nil)
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
            let window = windowScene.windows.first {
-            window.rootViewController?.present(activityViewController, animated: true)
+            window.rootViewController?.present(activityVC, animated: true)
         }
     }
     
@@ -459,20 +468,16 @@ struct MovieDetailView: View {
     }
 }
 
-struct StreamingButton: View {
-    let platform: StreamingPlatform
-    let movie: Movie
-    let streamingService: StreamingService
+struct StreamingInfoButton: View {
+    let info: StreamingInfo
     
     var body: some View {
-        Button(action: {
-            openStreamingPlatform(platform)
-        }) {
+        Button(action: openLink) {
             HStack {
-                Image(systemName: platform.iconName)
-                Text("Watch on \(platform.displayName)")
+                Image(systemName: "play.rectangle.fill")
+                Text("Watch on \(info.platform)")
                 Spacer()
-                Text(streamingService.getPrice(for: platform) ?? "")
+                Text(info.price ?? "")
                     .font(.caption)
                     .opacity(0.8)
             }
@@ -481,21 +486,15 @@ struct StreamingButton: View {
             .frame(maxWidth: .infinity)
             .padding(.vertical, 16)
             .padding(.horizontal, 20)
-            .background(Color(red: 0.97, green: 0.33, blue: 0.21)) // MovieDrop orange
+            .background(Color(red: 0.97, green: 0.33, blue: 0.21))
             .cornerRadius(12)
         }
     }
     
-    private func openStreamingPlatform(_ platform: StreamingPlatform) {
-        guard let url = streamingService.getStreamingURL(for: platform, movieTitle: movie.title) else {
-            print("Could not create URL for \(platform.displayName)")
-            return
-        }
-        
+    private func openLink() {
+        guard let url = URL(string: info.url) else { return }
         if UIApplication.shared.canOpenURL(url) {
             UIApplication.shared.open(url)
-        } else {
-            print("Cannot open URL: \(url)")
         }
     }
 }

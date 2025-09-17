@@ -15,6 +15,8 @@ struct Movie: Identifiable, Codable {
     let originalTitle: String?
     let popularity: Double?
     let video: Bool?
+    let rottenTomatoesScore: Int?
+    let communityReviews: [String]?
     
     enum CodingKeys: String, CodingKey {
         case id
@@ -31,6 +33,8 @@ struct Movie: Identifiable, Codable {
         case originalTitle = "original_title"
         case popularity
         case video
+        case rottenTomatoesScore = "rotten_tomatoes_score"
+        case communityReviews = "community_reviews"
     }
 
     // Support decoding from both snake_case (TMDB) and camelCase (our backend)
@@ -43,8 +47,47 @@ struct Movie: Identifiable, Codable {
         case genreIds
         case originalLanguage
         case originalTitle
+        case rottenTomatoesScore
+        case communityReviews
     }
 
+    // Memberwise initializer for creating Movie instances manually
+    init(
+        id: Int,
+        title: String,
+        overview: String? = nil,
+        posterPath: String? = nil,
+        releaseDate: String? = nil,
+        voteAverage: Double? = nil,
+        voteCount: Int? = nil,
+        adult: Bool? = nil,
+        backdropPath: String? = nil,
+        genreIds: [Int]? = nil,
+        originalLanguage: String? = nil,
+        originalTitle: String? = nil,
+        popularity: Double? = nil,
+        video: Bool? = nil,
+        rottenTomatoesScore: Int? = nil,
+        communityReviews: [String]? = nil
+    ) {
+        self.id = id
+        self.title = title
+        self.overview = overview
+        self.posterPath = posterPath
+        self.releaseDate = releaseDate
+        self.voteAverage = voteAverage
+        self.voteCount = voteCount
+        self.adult = adult
+        self.backdropPath = backdropPath
+        self.genreIds = genreIds
+        self.originalLanguage = originalLanguage
+        self.originalTitle = originalTitle
+        self.popularity = popularity
+        self.video = video
+        self.rottenTomatoesScore = rottenTomatoesScore
+        self.communityReviews = communityReviews
+    }
+    
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let camel = try? decoder.container(keyedBy: CamelKeys.self)
@@ -63,6 +106,8 @@ struct Movie: Identifiable, Codable {
         originalTitle = try container.decodeIfPresent(String.self, forKey: .originalTitle) ?? camel?.decodeIfPresent(String.self, forKey: .originalTitle)
         popularity = try container.decodeIfPresent(Double.self, forKey: .popularity)
         video = try container.decodeIfPresent(Bool.self, forKey: .video)
+        rottenTomatoesScore = try container.decodeIfPresent(Int.self, forKey: .rottenTomatoesScore) ?? camel?.decodeIfPresent(Int.self, forKey: .rottenTomatoesScore)
+        communityReviews = try container.decodeIfPresent([String].self, forKey: .communityReviews) ?? camel?.decodeIfPresent([String].self, forKey: .communityReviews)
     }
 
     // MARK: - Computed URLs

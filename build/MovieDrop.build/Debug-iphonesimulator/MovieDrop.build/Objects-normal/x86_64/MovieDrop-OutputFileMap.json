@@ -1,0 +1,138 @@
+{
+  "" : {
+    "diagnostics" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/MovieDrop-master.dia",
+    "emit-module-dependencies" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/MovieDrop-master-emit-module.d",
+    "emit-module-diagnostics" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/MovieDrop-master-emit-module.dia",
+    "swift-dependencies" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/MovieDrop-master.swiftdeps"
+  },
+  "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/MovieDrop/ContentView.swift" : {
+    "const-values" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/ContentView.swiftconstvalues",
+    "dependencies" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/ContentView.d",
+    "diagnostics" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/ContentView.dia",
+    "index-unit-output-path" : "/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/ContentView.o",
+    "llvm-bc" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/ContentView.bc",
+    "object" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/ContentView.o",
+    "swift-dependencies" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/ContentView.swiftdeps",
+    "swiftmodule" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/ContentView~partial.swiftmodule"
+  },
+  "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/MovieDrop/IntroView.swift" : {
+    "const-values" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/IntroView.swiftconstvalues",
+    "dependencies" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/IntroView.d",
+    "diagnostics" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/IntroView.dia",
+    "index-unit-output-path" : "/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/IntroView.o",
+    "llvm-bc" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/IntroView.bc",
+    "object" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/IntroView.o",
+    "swift-dependencies" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/IntroView.swiftdeps",
+    "swiftmodule" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/IntroView~partial.swiftmodule"
+  },
+  "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/MovieDrop/Models/Movie.swift" : {
+    "const-values" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/Movie.swiftconstvalues",
+    "dependencies" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/Movie.d",
+    "diagnostics" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/Movie.dia",
+    "index-unit-output-path" : "/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/Movie.o",
+    "llvm-bc" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/Movie.bc",
+    "object" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/Movie.o",
+    "swift-dependencies" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/Movie.swiftdeps",
+    "swiftmodule" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/Movie~partial.swiftmodule"
+  },
+  "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/MovieDrop/Models/User.swift" : {
+    "const-values" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/User.swiftconstvalues",
+    "dependencies" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/User.d",
+    "diagnostics" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/User.dia",
+    "index-unit-output-path" : "/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/User.o",
+    "llvm-bc" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/User.bc",
+    "object" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/User.o",
+    "swift-dependencies" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/User.swiftdeps",
+    "swiftmodule" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/User~partial.swiftmodule"
+  },
+  "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/MovieDrop/MovieDropApp.swift" : {
+    "const-values" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/MovieDropApp.swiftconstvalues",
+    "dependencies" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/MovieDropApp.d",
+    "diagnostics" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/MovieDropApp.dia",
+    "index-unit-output-path" : "/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/MovieDropApp.o",
+    "llvm-bc" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/MovieDropApp.bc",
+    "object" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/MovieDropApp.o",
+    "swift-dependencies" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/MovieDropApp.swiftdeps",
+    "swiftmodule" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/MovieDropApp~partial.swiftmodule"
+  },
+  "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/MovieDrop/Services/AuthService.swift" : {
+    "const-values" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/AuthService.swiftconstvalues",
+    "dependencies" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/AuthService.d",
+    "diagnostics" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/AuthService.dia",
+    "index-unit-output-path" : "/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/AuthService.o",
+    "llvm-bc" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/AuthService.bc",
+    "object" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/AuthService.o",
+    "swift-dependencies" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/AuthService.swiftdeps",
+    "swiftmodule" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/AuthService~partial.swiftmodule"
+  },
+  "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/MovieDrop/Services/MovieService.swift" : {
+    "const-values" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/MovieService.swiftconstvalues",
+    "dependencies" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/MovieService.d",
+    "diagnostics" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/MovieService.dia",
+    "index-unit-output-path" : "/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/MovieService.o",
+    "llvm-bc" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/MovieService.bc",
+    "object" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/MovieService.o",
+    "swift-dependencies" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/MovieService.swiftdeps",
+    "swiftmodule" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/MovieService~partial.swiftmodule"
+  },
+  "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/MovieDrop/Views/DiscoveryView.swift" : {
+    "const-values" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/DiscoveryView.swiftconstvalues",
+    "dependencies" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/DiscoveryView.d",
+    "diagnostics" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/DiscoveryView.dia",
+    "index-unit-output-path" : "/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/DiscoveryView.o",
+    "llvm-bc" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/DiscoveryView.bc",
+    "object" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/DiscoveryView.o",
+    "swift-dependencies" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/DiscoveryView.swiftdeps",
+    "swiftmodule" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/DiscoveryView~partial.swiftmodule"
+  },
+  "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/MovieDrop/Views/LoginView.swift" : {
+    "const-values" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/LoginView.swiftconstvalues",
+    "dependencies" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/LoginView.d",
+    "diagnostics" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/LoginView.dia",
+    "index-unit-output-path" : "/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/LoginView.o",
+    "llvm-bc" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/LoginView.bc",
+    "object" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/LoginView.o",
+    "swift-dependencies" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/LoginView.swiftdeps",
+    "swiftmodule" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/LoginView~partial.swiftmodule"
+  },
+  "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/MovieDrop/Views/RegisterView.swift" : {
+    "const-values" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/RegisterView.swiftconstvalues",
+    "dependencies" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/RegisterView.d",
+    "diagnostics" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/RegisterView.dia",
+    "index-unit-output-path" : "/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/RegisterView.o",
+    "llvm-bc" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/RegisterView.bc",
+    "object" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/RegisterView.o",
+    "swift-dependencies" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/RegisterView.swiftdeps",
+    "swiftmodule" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/RegisterView~partial.swiftmodule"
+  },
+  "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/MovieDrop/Views/WatchlistView.swift" : {
+    "const-values" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/WatchlistView.swiftconstvalues",
+    "dependencies" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/WatchlistView.d",
+    "diagnostics" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/WatchlistView.dia",
+    "index-unit-output-path" : "/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/WatchlistView.o",
+    "llvm-bc" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/WatchlistView.bc",
+    "object" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/WatchlistView.o",
+    "swift-dependencies" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/WatchlistView.swiftdeps",
+    "swiftmodule" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/WatchlistView~partial.swiftmodule"
+  },
+  "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/MovieDropMessageExtension/Services/StreamingService.swift" : {
+    "const-values" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/StreamingService.swiftconstvalues",
+    "dependencies" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/StreamingService.d",
+    "diagnostics" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/StreamingService.dia",
+    "index-unit-output-path" : "/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/StreamingService.o",
+    "llvm-bc" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/StreamingService.bc",
+    "object" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/StreamingService.o",
+    "swift-dependencies" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/StreamingService.swiftdeps",
+    "swiftmodule" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/StreamingService~partial.swiftmodule"
+  },
+  "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/DerivedSources/GeneratedAssetSymbols.swift" : {
+    "const-values" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/GeneratedAssetSymbols.swiftconstvalues",
+    "dependencies" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/GeneratedAssetSymbols.d",
+    "diagnostics" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/GeneratedAssetSymbols.dia",
+    "index-unit-output-path" : "/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/GeneratedAssetSymbols.o",
+    "llvm-bc" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/GeneratedAssetSymbols.bc",
+    "object" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/GeneratedAssetSymbols.o",
+    "swift-dependencies" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/GeneratedAssetSymbols.swiftdeps",
+    "swiftmodule" : "/Users/jrquint/Documents/Personal/AI projects/Movie Drop Main/MovieDrop/build/MovieDrop.build/Debug-iphonesimulator/MovieDrop.build/Objects-normal/x86_64/GeneratedAssetSymbols~partial.swiftmodule"
+  }
+}

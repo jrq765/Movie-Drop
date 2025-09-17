@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import { Metadata } from 'next'
-import { fetchMovie, fetchProviders, posterUrl, providerLogo } from '@/lib/tmdb'
+import { fetchMovie, fetchProviders, posterUrl, providerLogo } from '../../lib/tmdb'
 
 interface MoviePageProps {
   params: {
@@ -25,7 +25,7 @@ export async function generateMetadata({ params, searchParams }: MoviePageProps)
         description: movie.overview ? movie.overview.substring(0, 150) + '...' : `Watch ${movie.title} on your favorite streaming platform`,
         images: [
           {
-            url: posterUrl(movie.poster_path, "w780") || '/logo-moviedrop.svg',
+            url: posterUrl(movie.poster_path ?? undefined, "w780") || '/logo-moviedrop.svg',
             width: 780,
             height: 1170,
             alt: movie.title,
@@ -39,7 +39,7 @@ export async function generateMetadata({ params, searchParams }: MoviePageProps)
         title: `${movie.title} – Where to Watch | MovieDrop`,
         description: movie.overview ? movie.overview.substring(0, 150) + '...' : `Watch ${movie.title} on your favorite streaming platform`,
         images: [
-          posterUrl(movie.poster_path, "w780") || '/logo-moviedrop.svg'
+          posterUrl(movie.poster_path ?? undefined, "w780") || '/logo-moviedrop.svg'
         ],
       },
     }
@@ -83,9 +83,9 @@ export default async function MoviePage({ params, searchParams }: MoviePageProps
         <section className="mx-auto max-w-[1120px] px-4 pb-24">
           <div className="rounded-2xl border border-md-border bg-md-surface shadow-md p-5 md:p-8 grid grid-cols-1 md:grid-cols-[320px,1fr] gap-6">
             {/* Poster */}
-            {posterUrl(movie.poster_path) ? (
+            {posterUrl(movie.poster_path ?? undefined) ? (
               <img 
-                src={posterUrl(movie.poster_path, "w780")!} 
+                src={posterUrl(movie.poster_path ?? undefined, "w780")!} 
                 alt={movie.title} 
                 className="w-full h-auto rounded-xl object-cover" 
               />
@@ -120,9 +120,9 @@ export default async function MoviePage({ params, searchParams }: MoviePageProps
                       rel="noopener noreferrer"
                       className="group inline-flex items-center gap-2 rounded-full border border-md-border bg-white/5 hover:bg-white/10 px-3 py-1.5 text-sm"
                     >
-                      {providerLogo(provider.logo_path) && (
+                      {providerLogo(provider.logo_path ?? undefined) && (
                         <img 
-                          src={providerLogo(provider.logo_path)!} 
+                          src={providerLogo(provider.logo_path ?? undefined)!} 
                           alt="" 
                           className="h-4 w-4 rounded-[4px]" 
                         />
@@ -139,9 +139,9 @@ export default async function MoviePage({ params, searchParams }: MoviePageProps
                       rel="noopener noreferrer"
                       className="group inline-flex items-center gap-2 rounded-full border border-md-border bg-white/5 hover:bg-white/10 px-3 py-1.5 text-sm"
                     >
-                      {providerLogo(provider.logo_path) && (
+                      {providerLogo(provider.logo_path ?? undefined) && (
                         <img 
-                          src={providerLogo(provider.logo_path)!} 
+                          src={providerLogo(provider.logo_path ?? undefined)!} 
                           alt="" 
                           className="h-4 w-4 rounded-[4px]" 
                         />
@@ -158,9 +158,9 @@ export default async function MoviePage({ params, searchParams }: MoviePageProps
                       rel="noopener noreferrer"
                       className="group inline-flex items-center gap-2 rounded-full border border-md-border bg-white/5 hover:bg-white/10 px-3 py-1.5 text-sm"
                     >
-                      {providerLogo(provider.logo_path) && (
+                      {providerLogo(provider.logo_path ?? undefined) && (
                         <img 
-                          src={providerLogo(provider.logo_path)!} 
+                          src={providerLogo(provider.logo_path ?? undefined)!} 
                           alt="" 
                           className="h-4 w-4 rounded-[4px]" 
                         />

@@ -49,8 +49,30 @@ module.exports = async (req, res) => {
     const regionData = providersData?.results?.[region.toUpperCase()];
     const tmdbRegionLink = regionData?.link || `https://www.themoviedb.org/movie/${id}/watch?locale=${region}`;
 
-    // Function to generate direct streaming service URLs
-    const getDirectStreamingURL = (provider, movieTitle, movieYear) => {
+    // Optional: exact deep link resolvers
+    const resolveAppleTvExactUrl = async (title, year) => {
+      try {
+        const term = encodeURIComponent(title);
+        const yearQuery = year ? `&attribute=releaseYearTerm&limit=5` : `&limit=5`;
+        const url = `https://itunes.apple.com/search?term=${term}&entity=movie${year ? `&year=${year}` : ''}${yearQuery}`;
+        const resp = await fetch(url);
+        if (!resp.ok) return null;
+        const data = await resp.json();
+        const results = Array.isArray(data.results) ? data.results : [];
+        const normalizedTitle = (s) => (s || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+        const target = results.find(r => {
+          const namesMatch = normalizedTitle(r.trackName) === normalizedTitle(title);
+          const yearMatch = year ? String((r.releaseDate || '').slice(0,4)) === String(year) : true;
+          return namesMatch && yearMatch && !!r.trackViewUrl;
+        }) || results.find(r => !!r.trackViewUrl);
+        return target ? target.trackViewUrl : null;
+      } catch (_) {
+        return null;
+      }
+    };
+
+    // Function to generate direct streaming service URLs (fallbacks when exact IDs unavailable)
+    const getDirectStreamingURL = async (provider, movieTitle, movieYear) => {
       const title = encodeURIComponent(movieTitle);
       const year = movieYear || '';
       
@@ -68,8 +90,8 @@ module.exports = async (req, res) => {
         // Paramount+ - direct search
         531: `https://www.paramountplus.com/search?q=${title}`,
         
-        // Apple TV+ - direct search
-        350: `https://tv.apple.com/search?term=${title}`,
+        // Apple TV+ - try exact deep link via iTunes, fallback to search
+        350: null,
         
         // Peacock - direct search
         386: `https://www.peacocktv.com/search?q=${title}`,
@@ -83,8 +105,8 @@ module.exports = async (req, res) => {
         9: `https://www.amazon.com/s?k=${title}&i=movies-tv`,
         10: `https://www.amazon.com/s?k=${title}&i=movies-tv`,
         
-        // Apple TV (rent/buy) - direct search
-        2: `https://tv.apple.com/search?term=${title}`,
+        // Apple TV (rent/buy) - try exact deep link via iTunes, fallback to search
+        2: null,
         
         // Google Play - direct search
         3: `https://play.google.com/store/search?q=${title}&c=movies`,
@@ -102,6 +124,12 @@ module.exports = async (req, res) => {
         538: `https://watch.plex.tv/search?q=${title}`,
       };
       
+      // Apple TV exact link resolution
+      if (provider.provider_id === 350 || provider.provider_id === 2) {
+        const exact = await resolveAppleTvExactUrl(movieTitle, movieYear);
+        return exact || `https://tv.apple.com/search?term=${title}`;
+      }
+
       return directUrls[provider.provider_id] || null;
     };
 
@@ -113,7 +141,7 @@ module.exports = async (req, res) => {
       for (const kind of kinds) {
         const arr = regionData[kind] || [];
         for (const p of arr) {
-          const directUrl = getDirectStreamingURL(p, movie.title, movie.release_date?.slice(0,4));
+          const directUrl = await getDirectStreamingURL(p, movie.title, movie.release_date?.slice(0,4));
           if (directUrl) { // Only include providers with direct links
             providers.push({
               id: p.provider_id,
@@ -134,6 +162,9 @@ module.exports = async (req, res) => {
     );
 
     // Return HTML page for the movie
+    const IOS_APP_STORE_URL = process.env.IOS_APP_STORE_URL;
+    const APP_SCHEME = process.env.IOS_APP_SCHEME || 'moviedrop://';
+
     const html = `
 <!DOCTYPE html>
 <html lang="en">
@@ -146,9 +177,7 @@ module.exports = async (req, res) => {
     <meta property="og:image" content="https://image.tmdb.org/t/p/w500${movie.poster_path}">
     <meta property="og:url" content="https://moviedrop.app/m/${id}">
     <meta property="og:type" content="video.movie">
-    <!-- Universal Links disabled for now to ensure web page works on iOS -->
-    <!-- <meta name="apple-itunes-app" content="app-argument=movie://${id}"> -->
-    <!-- <link rel="alternate" href="moviedrop://movie/${id}" /> -->
+    <!-- App configuration is handled by script below with safe fallbacks -->
     <style>
         body { 
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
@@ -313,7 +342,8 @@ module.exports = async (req, res) => {
             <div class="app-banner">
                 <h3>📱 Have the MovieDrop App?</h3>
                 <p>Open this movie in the app for a better experience</p>
-                <a href="moviedrop://movie/${id}" class="app-button" id="openInApp">Open in App</a>
+                <a href="#" class="app-button" id="openInApp">Open in App</a>
+                ${IOS_APP_STORE_URL ? `<div style="margin-top:10px;"><a href="${IOS_APP_STORE_URL}" class="app-button" style="background:#333">Get the App</a></div>` : ''}
             </div>
             
             <h2>Where to Watch</h2>
@@ -360,8 +390,9 @@ module.exports = async (req, res) => {
                     e.preventDefault();
                     console.log('App button clicked - attempting to open app');
                     
-                    const appUrl = 'moviedrop://movie/${id}';
+                    const appUrl = '${APP_SCHEME}movie/${id}';
                     const universalLink = 'https://moviedrop.app/m/${id}';
+                    const appStoreUrl = ${IOS_APP_STORE_URL ? `'${IOS_APP_STORE_URL}'` : 'null'};
                     
                     // Try custom scheme first
                     const iframe = document.createElement('iframe');
@@ -373,7 +404,11 @@ module.exports = async (req, res) => {
                     setTimeout(() => {
                         document.body.removeChild(iframe);
                         console.log('App not opened, redirecting to universal link');
-                        window.location.href = universalLink;
+                        if (isIOS && appStoreUrl) {
+                          window.location.href = appStoreUrl;
+                        } else {
+                          window.location.href = universalLink;
+                        }
                     }, 2000);
                 });
             }

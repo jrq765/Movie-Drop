@@ -1,5 +1,9 @@
 {
   "name": "moviedrop-api",
   "version": "1.0.0",
-  "description": "MovieDrop API - Vercel Serverless Functions"
+  "description": "MovieDrop API - Vercel Serverless Functions",
+  "scripts": {
+    "check:links": "node scripts/check-links.js",
+    "precommit": "npm run check:links"
+  }
 }

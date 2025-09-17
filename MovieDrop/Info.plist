@@ -59,15 +59,24 @@
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>MOVIEDROP_API_BASE_URL</key>
-	<string>https://movie-drop-c0oubcxt9-jr-quints-projects.vercel.app/api</string>
+	<string>https://movie-drop-production.up.railway.app</string>
 	<key>TMDB_API_KEY</key>
-	<string>a5caa7704f1fa4866a6936d8733d1c11</string>
+	<string>5e77a44f0359e50e8ecd84b28ff9dc99</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 		<key>NSExceptionDomains</key>
 		<dict>
+			<key>192.168.0.31</key>
+			<dict>
+				<key>NSExceptionAllowsInsecureHTTPLoads</key>
+				<true/>
+				<key>NSExceptionMinimumTLSVersion</key>
+				<string>TLSv1.2</string>
+				<key>NSIncludesSubdomains</key>
+				<true/>
+			</dict>
 			<key>api.themoviedb.org</key>
 			<dict>
 				<key>NSExceptionAllowsInsecureHTTPLoads</key>

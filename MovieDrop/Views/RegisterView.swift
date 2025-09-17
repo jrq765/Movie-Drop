@@ -115,7 +115,7 @@ struct RegisterView: View {
                 .foregroundColor(Color(red: 0.97, green: 0.33, blue: 0.21))
             )
         }
-        .onChange(of: authService.isAuthenticated) { isAuthenticated in
+        .onChange(of: authService.isAuthenticated) { _, isAuthenticated in
             if isAuthenticated {
                 presentationMode.wrappedValue.dismiss()
             }
