@@ -193,7 +193,7 @@ class StreamingService: ObservableObject {
                         streamingType = .subscription
                         priceText = "Subscription"
                     case "rent/buy":
-                        streamingType = StreamingInfo.StreamingType.rentBuy
+                        streamingType = StreamingInfo.StreamingType(rawValue: "rent/buy") ?? .subscription
                         priceText = "Rent/Buy"
                     case "rent":
                         streamingType = .rent
@@ -230,14 +230,20 @@ class StreamingService: ObservableObject {
                     // Then sort by type priority
                     let typePriority: [StreamingInfo.StreamingType: Int] = [
                         .subscription: 1,
-                        StreamingInfo.StreamingType.rentBuy: 2,
                         .rent: 3,
                         .buy: 4,
                         .free: 5
                     ]
                     
-                    let firstTypePriority = typePriority[first.type] ?? 6
-                    let secondTypePriority = typePriority[second.type] ?? 6
+                    // Handle rent/buy case separately
+                    let rentBuyType = StreamingInfo.StreamingType(rawValue: "rent/buy")
+                    var typePriorityWithRentBuy = typePriority
+                    if let rentBuy = rentBuyType {
+                        typePriorityWithRentBuy[rentBuy] = 2
+                    }
+                    
+                    let firstTypePriority = typePriorityWithRentBuy[first.type] ?? 6
+                    let secondTypePriority = typePriorityWithRentBuy[second.type] ?? 6
                     
                     return firstTypePriority < secondTypePriority
                 }
