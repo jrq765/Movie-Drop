@@ -49,10 +49,13 @@ struct MovieCardData {
 
 enum MessageComposer {
     static func buildURL(base: String, movieId: String, region: String) -> URL? {
-        // Create branded landing page URL
+        // Create branded landing page URL with cache-busting for iMessage
         var comps = URLComponents(string: base)
         comps?.path = "/m/\(movieId)"
-        comps?.queryItems = [URLQueryItem(name: "region", value: region)]
+        comps?.queryItems = [
+            URLQueryItem(name: "region", value: region),
+            URLQueryItem(name: "v", value: "3") // Cache-busting parameter
+        ]
         
         let finalURL = comps?.url
         print("🔗 MessageComposer: Building URL - Base: \(base), MovieID: \(movieId), Region: \(region)")

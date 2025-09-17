@@ -182,25 +182,63 @@ class StreamingService: ObservableObject {
                             print("🎬 StreamingService: Provider \(index + 1): \(provider.name) - \(provider.url)")
                         }
                 
-                // Convert to StreamingInfo - only use primary provider for now
-                let streamingInfos: [StreamingInfo] = resp.providers.compactMap { provider in
-                    guard let url = URL(string: provider.url) else { return nil }
+                // Convert to StreamingInfo and combine rent/buy for same platform
+                var platformMap: [String: StreamingInfo] = [:]
+                
+                for provider in resp.providers {
+                    guard let url = URL(string: provider.url) else { continue }
                     
+                    let platformName = provider.name
                     let streamingType: StreamingInfo.StreamingType
+                    let priceText: String
+                    
                     switch provider.kind {
-                    case "flatrate": streamingType = .subscription
-                    case "rent": streamingType = .rent
-                    case "buy": streamingType = .buy
-                    default: streamingType = .subscription
+                    case "flatrate": 
+                        streamingType = .subscription
+                        priceText = "Subscription"
+                    case "rent": 
+                        streamingType = .rent
+                        priceText = "Rent"
+                    case "buy": 
+                        streamingType = .buy
+                        priceText = "Buy"
+                    default: 
+                        streamingType = .subscription
+                        priceText = "Subscription"
                     }
                     
-                    return StreamingInfo(
-                        platform: provider.name,
-                        type: streamingType,
-                        url: provider.url,
-                        price: provider.kind == "flatrate" ? "Subscription" : "Rent/Buy"
-                    )
+                    // If we already have this platform, combine rent/buy options
+                    if let existing = platformMap[platformName] {
+                        if existing.type == .rent && streamingType == .buy {
+                            // Combine rent + buy
+                            platformMap[platformName] = StreamingInfo(
+                                platform: platformName,
+                                type: .rent, // Keep as rent type
+                                url: existing.url, // Keep rent URL (usually cheaper)
+                                price: "Rent/Buy"
+                            )
+                        } else if existing.type == .buy && streamingType == .rent {
+                            // Combine buy + rent
+                            platformMap[platformName] = StreamingInfo(
+                                platform: platformName,
+                                type: .rent, // Use rent type
+                                url: provider.url, // Use rent URL (usually cheaper)
+                                price: "Rent/Buy"
+                            )
+                        }
+                        // If both are same type or one is subscription, keep the existing
+                    } else {
+                        // First time seeing this platform
+                        platformMap[platformName] = StreamingInfo(
+                            platform: platformName,
+                            type: streamingType,
+                            url: provider.url,
+                            price: priceText
+                        )
+                    }
                 }
+                
+                let streamingInfos = Array(platformMap.values)
                 
                 print("🎬 StreamingService: Final streaming infos: \(streamingInfos.count)")
                 
