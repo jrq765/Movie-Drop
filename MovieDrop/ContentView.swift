@@ -586,23 +586,15 @@ struct MovieDropStreamingCard: View {
     
     var body: some View {
         Button(action: openDirectLink) {
-            VStack(alignment: .leading, spacing: 8) {
-                HStack {
-                    Image(systemName: "play.rectangle.fill")
-                        .font(.title2)
-                        .foregroundColor(Color(red: 0.97, green: 0.33, blue: 0.21)) // MovieDrop orange
-                    
-                    Spacer()
-                    
-                    Image(systemName: "arrow.up.right")
-                        .font(.caption)
-                        .foregroundColor(Color(red: 0.97, green: 0.33, blue: 0.21))
-                }
+            HStack(spacing: 12) {
+                // Provider logo/icon
+                providerIcon
                 
-                VStack(alignment: .leading, spacing: 4) {
+                // Provider info
+                VStack(alignment: .leading, spacing: 2) {
                     Text(platformName)
-                        .font(.headline)
-                        .fontWeight(.semibold)
+                        .font(.subheadline)
+                        .fontWeight(.medium)
                         .foregroundColor(.primary)
                         .lineLimit(1)
                     
@@ -611,17 +603,67 @@ struct MovieDropStreamingCard: View {
                         .foregroundColor(.secondary)
                         .lineLimit(1)
                 }
+                
+                Spacer()
+                
+                // External link icon
+                Image(systemName: "arrow.up.right")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(16)
-            .background(Color(red: 0.97, green: 0.33, blue: 0.21).opacity(0.1))
+            .padding(12)
+            .background(Color(.systemGray6))
             .cornerRadius(12)
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
-                    .stroke(Color(red: 0.97, green: 0.33, blue: 0.21).opacity(0.3), lineWidth: 1)
+                    .stroke(Color(.systemGray4), lineWidth: 0.5)
             )
         }
         .buttonStyle(PlainButtonStyle())
+    }
+    
+    @ViewBuilder
+    private var providerIcon: some View {
+        // Use platform-specific icons or fallback to first letter
+        switch platformName.lowercased() {
+        case let name where name.contains("netflix"):
+            Image(systemName: "play.rectangle.fill")
+                .foregroundColor(.red)
+        case let name where name.contains("prime") || name.contains("amazon"):
+            Image(systemName: "play.rectangle.fill")
+                .foregroundColor(.blue)
+        case let name where name.contains("hulu"):
+            Image(systemName: "play.rectangle.fill")
+                .foregroundColor(.green)
+        case let name where name.contains("disney"):
+            Image(systemName: "play.rectangle.fill")
+                .foregroundColor(.blue)
+        case let name where name.contains("max") || name.contains("hbo"):
+            Image(systemName: "play.rectangle.fill")
+                .foregroundColor(.purple)
+        case let name where name.contains("apple"):
+            Image(systemName: "play.rectangle.fill")
+                .foregroundColor(.gray)
+        case let name where name.contains("youtube"):
+            Image(systemName: "play.rectangle.fill")
+                .foregroundColor(.red)
+        case let name where name.contains("paramount"):
+            Image(systemName: "play.rectangle.fill")
+                .foregroundColor(.blue)
+        case let name where name.contains("peacock"):
+            Image(systemName: "play.rectangle.fill")
+                .foregroundColor(.blue)
+        default:
+            // Fallback to first letter in a circle
+            Text(String(platformName.prefix(1)))
+                .font(.caption)
+                .fontWeight(.semibold)
+                .foregroundColor(.white)
+                .frame(width: 24, height: 24)
+                .background(Color(red: 0.97, green: 0.33, blue: 0.21))
+                .clipShape(Circle())
+        }
     }
     
     private var platformName: String {

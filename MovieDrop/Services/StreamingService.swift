@@ -126,7 +126,7 @@ class StreamingService: ObservableObject {
 
     private func fetchAvailability(movieId: Int, movieTitle: String) {
         // Fetch all types of streaming options (flatrate, rent, buy) - get comprehensive data
-        guard let url = URL(string: "\(baseURL)/streaming/\(movieId)?region=US&kind=flatrate&primaryOnly=false&limit=12") else { return }
+        guard let url = URL(string: "\(baseURL)/streaming/\(movieId)?region=US") else { return }
         var request = URLRequest(url: url)
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
