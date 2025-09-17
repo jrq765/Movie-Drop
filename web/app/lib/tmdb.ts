@@ -14,6 +14,7 @@ interface WatchProvider {
   provider_name: string
   logo_path: string | null
   link: string
+  kind: string
 }
 
 interface WatchProvidersResponse {
@@ -52,7 +53,7 @@ export async function fetchMovie(id: string): Promise<MovieData> {
   return response.json()
 }
 
-export async function fetchProviders(id: string, region: string = 'US'): Promise<WatchProvidersResponse | null> {
+export async function fetchProviders(id: string, region: string = 'US'): Promise<WatchProvider[] | null> {
   try {
     const response = await fetch(
       `${MOVIEDROP_API_BASE}/streaming/${id}?region=${region}`,
@@ -68,29 +69,16 @@ export async function fetchProviders(id: string, region: string = 'US'): Promise
 
     const data = await response.json()
 
-    // Transform the data to include links (using JustWatch deep links)
-    const transformProviders = (providers: any[]): WatchProvider[] => {
-      return providers.map(provider => ({
-        provider_id: provider.provider_id,
-        provider_name: provider.provider_name,
-        logo_path: provider.logo_path,
-        link: `https://www.justwatch.com/us/movie/${id}` // JustWatch deep link
-      }))
-    }
+    // Transform the combined providers data
+    const providers: WatchProvider[] = data.providers.map((provider: any) => ({
+      provider_id: provider.provider_id,
+      provider_name: provider.name, // Use the combined name
+      logo_path: provider.logo_path,
+      link: provider.url, // Use the direct URL from our API
+      kind: provider.kind // Add kind for display
+    }))
 
-    const result: WatchProvidersResponse = {}
-
-    if (data.flatrate) {
-      result.flatrate = transformProviders(data.flatrate)
-    }
-    if (data.rent) {
-      result.rent = transformProviders(data.rent)
-    }
-    if (data.buy) {
-      result.buy = transformProviders(data.buy)
-    }
-
-    return result
+    return providers
   } catch (error) {
     console.error('Error fetching watch providers:', error)
     return null

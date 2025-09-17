@@ -112,7 +112,7 @@ export default async function MoviePage({ params, searchParams }: MoviePageProps
               <div className="mt-2">
                 <h2 className="text-xl font-semibold mb-3">Where to Watch</h2>
                 <div className="flex flex-wrap gap-2">
-                  {watchProviders?.flatrate && watchProviders.flatrate.map((provider) => (
+                  {watchProviders && watchProviders.map((provider) => (
                     <a
                       key={provider.provider_id}
                       href={provider.link}
@@ -128,51 +128,16 @@ export default async function MoviePage({ params, searchParams }: MoviePageProps
                         />
                       )}
                       <span>{provider.provider_name}</span>
+                      <span className="text-xs text-md-inkMuted">
+                        {provider.kind === 'flatrate' ? 'Subscription' : 
+                         provider.kind === 'rent/buy' ? 'Rent/Buy' :
+                         provider.kind === 'rent' ? 'Rent' :
+                         provider.kind === 'buy' ? 'Buy' : 'Available'}
+                      </span>
                     </a>
                   ))}
                   
-                  {watchProviders?.rent && watchProviders.rent.map((provider) => (
-                    <a
-                      key={provider.provider_id}
-                      href={provider.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="group inline-flex items-center gap-2 rounded-full border border-md-border bg-white/5 hover:bg-white/10 px-3 py-1.5 text-sm"
-                    >
-                      {providerLogo(provider.logo_path ?? undefined) && (
-                        <img 
-                          src={providerLogo(provider.logo_path ?? undefined)!} 
-                          alt="" 
-                          className="h-4 w-4 rounded-[4px]" 
-                        />
-                      )}
-                      <span>{provider.provider_name}</span>
-                    </a>
-                  ))}
-                  
-                  {watchProviders?.buy && watchProviders.buy.map((provider) => (
-                    <a
-                      key={provider.provider_id}
-                      href={provider.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="group inline-flex items-center gap-2 rounded-full border border-md-border bg-white/5 hover:bg-white/10 px-3 py-1.5 text-sm"
-                    >
-                      {providerLogo(provider.logo_path ?? undefined) && (
-                        <img 
-                          src={providerLogo(provider.logo_path ?? undefined)!} 
-                          alt="" 
-                          className="h-4 w-4 rounded-[4px]" 
-                        />
-                      )}
-                      <span>{provider.provider_name}</span>
-                    </a>
-                  ))}
-                  
-                  {(!watchProviders || 
-                    (!watchProviders.flatrate?.length && 
-                     !watchProviders.rent?.length && 
-                     !watchProviders.buy?.length)) && (
+                  {(!watchProviders || watchProviders.length === 0) && (
                     <p className="text-md-inkMuted text-sm">
                       Streaming availability information is not available for this movie.
                     </p>
