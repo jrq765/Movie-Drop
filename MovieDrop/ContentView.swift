@@ -457,8 +457,9 @@ struct MovieDetailView: View {
     
     
     private func shareMovie() {
-        // Universal link with cache-busting to refresh iMessage preview
-        let movieURL = "https://moviedrop.app/m/\(movie.id)?region=US&v=2"
+        // Share both: App link (custom scheme) and web link as fallback
+        let appURLString = "moviedrop://movie/\(movie.id)"
+        let webURLString = "https://moviedrop.app/m/\(movie.id)?region=US&v=4"
         
         // Create visual movie card
         Task {
@@ -472,13 +473,12 @@ struct MovieDetailView: View {
                     items.append(cardImage)
                 }
                 
-                // Add the URL
-                if let url = URL(string: movieURL) {
-                    items.append(url)
-                }
+                // Prefer app link; include web link as fallback
+                if let appURL = URL(string: appURLString) { items.append(appURL) }
+                if let webURL = URL(string: webURLString) { items.append(webURL) }
                 
                 // Add text fallback
-                let message = createMovieCardText()
+                let message = createMovieCardText() + "\n\nOpen in app: \(appURLString)\nWeb: \(webURLString)"
                 items.append(message)
                 
                 let activityVC = UIActivityViewController(activityItems: items, applicationActivities: nil)

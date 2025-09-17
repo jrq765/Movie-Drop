@@ -48,18 +48,21 @@ struct MovieCardData {
 }
 
 enum MessageComposer {
+    static func buildAppURL(movieId: String) -> URL? {
+        URL(string: "moviedrop://movie/\(movieId)")
+    }
     static func buildURL(base: String, movieId: String, region: String) -> URL? {
-        // Create branded landing page URL with cache-busting for iMessage
+        // Create Universal Link that opens the main app
         var comps = URLComponents(string: base)
         comps?.path = "/m/\(movieId)"
         comps?.queryItems = [
             URLQueryItem(name: "region", value: region),
-            URLQueryItem(name: "v", value: "3") // Cache-busting parameter
+            URLQueryItem(name: "v", value: "4") // Cache-busting parameter
         ]
         
         let finalURL = comps?.url
-        print("🔗 MessageComposer: Building URL - Base: \(base), MovieID: \(movieId), Region: \(region)")
-        print("🔗 MessageComposer: Final URL: \(finalURL?.absoluteString ?? "nil")")
+        print("🔗 MessageComposer: Building Universal Link - Base: \(base), MovieID: \(movieId), Region: \(region)")
+        print("🔗 MessageComposer: Final Universal Link: \(finalURL?.absoluteString ?? "nil")")
         
         return finalURL
     }
@@ -82,11 +85,17 @@ enum MessageComposer {
         message.layout = layout
         message.summaryText = "\(card.title)\(layout.imageSubtitle?.isEmpty == false ? " • \(layout.imageSubtitle!)" : "")"
 
-        if let url = buildURL(base: universalBaseURL, movieId: card.id, region: region) {
-            message.url = url
-            print("🔗 MessageComposer: Set message URL to: \(url.absoluteString)")
+        // Prefer opening the main app via custom scheme when installed
+        let appURL = buildAppURL(movieId: card.id)
+        let webURL = buildURL(base: universalBaseURL, movieId: card.id, region: region)
+        if let appURL {
+            message.url = appURL
+            print("🔗 MessageComposer: Set message URL to App Link: \(appURL.absoluteString)")
+        } else if let webURL {
+            message.url = webURL
+            print("🔗 MessageComposer: Set message URL to Web Link: \(webURL.absoluteString)")
         } else {
-            print("❌ MessageComposer: Failed to build URL for movie \(card.id)")
+            print("❌ MessageComposer: Failed to build any URL for movie \(card.id)")
         }
         return message
     }
