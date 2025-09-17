@@ -43,6 +43,15 @@ app.get('/health', (req, res) => {
   });
 });
 
+// Debug endpoint to check environment variables
+app.get('/debug', (req, res) => {
+  res.json({
+    tmdb_key_set: !!process.env.TMDB_API_KEY,
+    tmdb_key_length: process.env.TMDB_API_KEY ? process.env.TMDB_API_KEY.length : 0,
+    tmdb_key_start: process.env.TMDB_API_KEY ? process.env.TMDB_API_KEY.substring(0, 8) + '...' : 'not set'
+  });
+});
+
 // API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/movies', movieRoutes);
