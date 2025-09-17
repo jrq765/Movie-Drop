@@ -383,44 +383,48 @@ struct MovieDetailView: View {
                     }
                     
                     // Streaming Options (use direct links from backend when available)
-                    VStack(alignment: .leading, spacing: 16) {
-                        HStack {
-                            Text("Where to Watch")
-                                .font(.title2)
-                                .fontWeight(.semibold)
-                                .foregroundColor(.primary)
-                            
-                            Spacer()
-                            
-                        }
-
-                        let streamingInfo = streamingService.getStreamingInfo(for: movie)
-                        
-                        if streamingInfo.isEmpty {
-                            // Show loading state
+                        VStack(alignment: .leading, spacing: 16) {
                             HStack {
-                                ProgressView()
-                                    .scaleEffect(0.8)
-                                Text("Finding available streaming options...")
-                                    .font(.subheadline)
-                                    .foregroundColor(.secondary)
+                                Text("Where to Watch")
+                                    .font(.title2)
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(Color(red: 0.97, green: 0.33, blue: 0.21)) // MovieDrop orange
+                                
+                                Spacer()
                             }
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 20)
-                            .background(Color.gray.opacity(0.1))
-                            .cornerRadius(12)
-                        } else {
-                            // Show available streaming options
-                            LazyVGrid(columns: [
-                                GridItem(.flexible()),
-                                GridItem(.flexible())
-                            ], spacing: 12) {
-                                ForEach(streamingInfo, id: \.url) { info in
-                                    StreamingInfoCard(info: info)
+
+                            let streamingInfo = streamingService.getStreamingInfo(for: movie)
+                            
+                            if streamingInfo.isEmpty {
+                                // Show loading state with company colors
+                                HStack {
+                                    ProgressView()
+                                        .scaleEffect(0.8)
+                                        .tint(Color(red: 0.97, green: 0.33, blue: 0.21))
+                                    Text("Finding available streaming options...")
+                                        .font(.subheadline)
+                                        .foregroundColor(.secondary)
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 20)
+                                .background(Color(red: 0.97, green: 0.33, blue: 0.21).opacity(0.1))
+                                .cornerRadius(12)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(Color(red: 0.97, green: 0.33, blue: 0.21).opacity(0.3), lineWidth: 1)
+                                )
+                            } else {
+                                // Show only real streaming options for this specific movie
+                                LazyVGrid(columns: [
+                                    GridItem(.flexible()),
+                                    GridItem(.flexible())
+                                ], spacing: 12) {
+                                    ForEach(streamingInfo, id: \.url) { info in
+                                        MovieDropStreamingCard(info: info)
+                                    }
                                 }
                             }
                         }
-                    }
                     
                     // Share Button
                     Button(action: shareMovie) {
@@ -577,22 +581,22 @@ struct MovieDetailView: View {
     }
 }
 
-struct StreamingInfoCard: View {
+struct MovieDropStreamingCard: View {
     let info: StreamingInfo
     
     var body: some View {
-        Button(action: openLink) {
+        Button(action: openDirectLink) {
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
-                    Image(systemName: platformIcon)
+                    Image(systemName: "play.rectangle.fill")
                         .font(.title2)
-                        .foregroundColor(platformColor)
+                        .foregroundColor(Color(red: 0.97, green: 0.33, blue: 0.21)) // MovieDrop orange
                     
                     Spacer()
                     
                     Image(systemName: "arrow.up.right")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(Color(red: 0.97, green: 0.33, blue: 0.21))
                 }
                 
                 VStack(alignment: .leading, spacing: 4) {
@@ -610,42 +614,14 @@ struct StreamingInfoCard: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(16)
-            .background(Color(.systemGray6))
+            .background(Color(red: 0.97, green: 0.33, blue: 0.21).opacity(0.1))
             .cornerRadius(12)
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
-                    .stroke(platformColor.opacity(0.3), lineWidth: 1)
+                    .stroke(Color(red: 0.97, green: 0.33, blue: 0.21).opacity(0.3), lineWidth: 1)
             )
         }
         .buttonStyle(PlainButtonStyle())
-    }
-    
-    private var platformIcon: String {
-        let platform = info.platform.lowercased()
-        if platform.contains("netflix") { return "play.rectangle.fill" }
-        if platform.contains("prime") || platform.contains("amazon") { return "play.rectangle.fill" }
-        if platform.contains("hulu") { return "play.rectangle.fill" }
-        if platform.contains("disney") { return "play.rectangle.fill" }
-        if platform.contains("max") || platform.contains("hbo") { return "play.rectangle.fill" }
-        if platform.contains("apple") { return "play.rectangle.fill" }
-        if platform.contains("youtube") { return "play.rectangle.fill" }
-        if platform.contains("paramount") { return "play.rectangle.fill" }
-        if platform.contains("peacock") { return "play.rectangle.fill" }
-        return "play.rectangle.fill"
-    }
-    
-    private var platformColor: Color {
-        let platform = info.platform.lowercased()
-        if platform.contains("netflix") { return .red }
-        if platform.contains("prime") || platform.contains("amazon") { return .blue }
-        if platform.contains("hulu") { return .green }
-        if platform.contains("disney") { return .blue }
-        if platform.contains("max") || platform.contains("hbo") { return .purple }
-        if platform.contains("apple") { return .gray }
-        if platform.contains("youtube") { return .red }
-        if platform.contains("paramount") { return .blue }
-        if platform.contains("peacock") { return .blue }
-        return Color(red: 0.97, green: 0.33, blue: 0.21)
     }
     
     private var platformName: String {
@@ -675,10 +651,25 @@ struct StreamingInfoCard: View {
         }
     }
     
-    private func openLink() {
-        guard let url = URL(string: info.url) else { return }
+    private func openDirectLink() {
+        // Ensure we're opening the direct link from the API (no redirects)
+        guard let url = URL(string: info.url) else { 
+            print("❌ Invalid streaming URL: \(info.url)")
+            return 
+        }
+        
+        print("🎬 Opening direct streaming link: \(info.platform) - \(info.url)")
+        
         if UIApplication.shared.canOpenURL(url) {
-            UIApplication.shared.open(url)
+            UIApplication.shared.open(url, options: [:]) { success in
+                if success {
+                    print("✅ Successfully opened \(info.platform)")
+                } else {
+                    print("❌ Failed to open \(info.platform)")
+                }
+            }
+        } else {
+            print("❌ Cannot open URL: \(url)")
         }
     }
 }

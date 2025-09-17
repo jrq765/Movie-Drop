@@ -125,8 +125,8 @@ class StreamingService: ObservableObject {
     private var cachedAvailability: [Int: [StreamingPlatform]] = [:]
 
     private func fetchAvailability(movieId: Int, movieTitle: String) {
-        // Fetch all types of streaming options (flatrate, rent, buy)
-        guard let url = URL(string: "\(baseURL)/streaming/\(movieId)?region=US&kind=flatrate&primaryOnly=false&limit=8") else { return }
+        // Fetch all types of streaming options (flatrate, rent, buy) - get comprehensive data
+        guard let url = URL(string: "\(baseURL)/streaming/\(movieId)?region=US&kind=flatrate&primaryOnly=false&limit=12") else { return }
         var request = URLRequest(url: url)
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
@@ -170,12 +170,17 @@ class StreamingService: ObservableObject {
                 let buy: Int
             }
             
-            do {
-                let resp = try JSONDecoder().decode(StreamingResponse.self, from: data)
-                print("🎬 StreamingService: Fetched data for movie \(movieId)")
-                print("🎬 StreamingService: Primary provider: \(resp.primary?.name ?? "none")")
-                print("🎬 StreamingService: Total providers: \(resp.providers.count)")
-                print("🎬 StreamingService: Counts - flatrate: \(resp.counts.flatrate), rent: \(resp.counts.rent), buy: \(resp.counts.buy)")
+                    do {
+                        let resp = try JSONDecoder().decode(StreamingResponse.self, from: data)
+                        print("🎬 StreamingService: Fetched data for movie \(movieId)")
+                        print("🎬 StreamingService: Primary provider: \(resp.primary?.name ?? "none")")
+                        print("🎬 StreamingService: Total providers: \(resp.providers.count)")
+                        print("🎬 StreamingService: Counts - flatrate: \(resp.counts.flatrate), rent: \(resp.counts.rent), buy: \(resp.counts.buy)")
+                        
+                        // Debug: Print all providers
+                        for (index, provider) in resp.providers.enumerated() {
+                            print("🎬 StreamingService: Provider \(index + 1): \(provider.name) - \(provider.url)")
+                        }
                 
                 // Convert to StreamingInfo - only use primary provider for now
                 let streamingInfos: [StreamingInfo] = resp.providers.compactMap { provider in
