@@ -392,8 +392,9 @@ struct MovieDetailView: View {
                             
                             Spacer()
                             
-                            if !streamingService.getStreamingInfo(for: movie).isEmpty {
-                                Text("\(streamingService.getStreamingInfo(for: movie).count) options")
+                            let totalCount = streamingService.getStreamingCount(for: movie)
+                            if totalCount > 0 {
+                                Text("\(totalCount) options")
                                     .font(.caption)
                                     .foregroundColor(.secondary)
                                     .padding(.horizontal, 8)

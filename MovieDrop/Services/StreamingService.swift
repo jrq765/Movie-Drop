@@ -84,6 +84,9 @@ class StreamingService: ObservableObject {
     /// Published cache for UI updates
     @Published private(set) var streamingByMovieId: [Int: [StreamingInfo]] = [:]
     
+    /// Published cache for total counts
+    @Published private(set) var streamingCountsByMovieId: [Int: (flatrate: Int, rent: Int, buy: Int)] = [:]
+    
     /// Track fetch operations in progress to avoid duplicates
     private var fetchInProgress: Set<Int> = []
 
@@ -107,12 +110,20 @@ class StreamingService: ObservableObject {
         // Return empty array until real data arrives - NO FALLBACKS
         return []
     }
+    
+    /// Get total streaming options count for UI
+    func getStreamingCount(for movie: Movie) -> Int {
+        if let counts = streamingCountsByMovieId[movie.id] {
+            return counts.flatrate + counts.rent + counts.buy
+        }
+        return 0
+    }
 
     // MARK: - Availability Cache
     private var cachedAvailability: [Int: [StreamingPlatform]] = [:]
 
     private func fetchAvailability(movieId: Int, movieTitle: String) {
-        guard let url = URL(string: "\(baseURL)/streaming/\(movieId)?region=US") else { return }
+        guard let url = URL(string: "\(baseURL)/streaming/\(movieId)?region=US&kind=flatrate&primaryOnly=true") else { return }
         var request = URLRequest(url: url)
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
@@ -132,46 +143,54 @@ class StreamingService: ObservableObject {
                 print("🎬 StreamingService: HTTP \(httpResponse.statusCode) for movie \(movieId)")
             }
             
-            // Handle local backend format
-            struct LocalResponse: Decodable {
-                let flatrate: [Provider]?
-                let purchase: [Provider]?
+            // Handle new API format
+            struct StreamingResponse: Decodable {
+                let id: Int
+                let title: String
+                let year: Int
+                let region: String
+                let primary: ProviderInfo?
+                let providers: [ProviderInfo]
+                let counts: Counts
             }
-            struct Provider: Decodable {
-                let provider_id: Int
-                let provider_name: String
-                let logo_path: String
-                let display_priority: Int
-                let kind: String?
+            struct ProviderInfo: Decodable {
+                let name: String
+                let kind: String
+                let url: String
+                let logo_path: String?
+                let provider_id: Int?
+                let display_priority: Int?
+            }
+            struct Counts: Decodable {
+                let flatrate: Int
+                let rent: Int
+                let buy: Int
             }
             
             do {
-                let resp = try JSONDecoder().decode(LocalResponse.self, from: data)
+                let resp = try JSONDecoder().decode(StreamingResponse.self, from: data)
                 print("🎬 StreamingService: Fetched data for movie \(movieId)")
-                print("🎬 StreamingService: Flatrate providers: \(resp.flatrate?.count ?? 0)")
-                print("🎬 StreamingService: Purchase providers: \(resp.purchase?.count ?? 0)")
+                print("🎬 StreamingService: Primary provider: \(resp.primary?.name ?? "none")")
+                print("🎬 StreamingService: Total providers: \(resp.providers.count)")
+                print("🎬 StreamingService: Counts - flatrate: \(resp.counts.flatrate), rent: \(resp.counts.rent), buy: \(resp.counts.buy)")
                 
-                var allProviders: [Provider] = []
-                if let flatrate = resp.flatrate {
-                    allProviders.append(contentsOf: flatrate.map { Provider(provider_id: $0.provider_id, provider_name: $0.provider_name, logo_path: $0.logo_path, display_priority: $0.display_priority, kind: "subscription") })
-                }
-                if let purchase = resp.purchase {
-                    allProviders.append(contentsOf: purchase)
-                }
-                
-                print("🎬 StreamingService: Total providers: \(allProviders.count)")
-                
-                // Convert to StreamingInfo with direct URLs
-                let streamingInfos: [StreamingInfo] = allProviders.compactMap { provider in
-                    let directUrl = self.getDirectURL(for: provider.provider_id, movieTitle: movieTitle)
-                    print("🎬 StreamingService: Provider \(provider.provider_id) (\(provider.provider_name)) -> URL: \(directUrl?.absoluteString ?? "nil")")
-                    guard let url = directUrl else { return nil }
+                // Convert to StreamingInfo - only use primary provider for now
+                let streamingInfos: [StreamingInfo] = resp.providers.compactMap { provider in
+                    guard let url = URL(string: provider.url) else { return nil }
+                    
+                    let streamingType: StreamingInfo.StreamingType
+                    switch provider.kind {
+                    case "flatrate": streamingType = .subscription
+                    case "rent": streamingType = .rent
+                    case "buy": streamingType = .buy
+                    default: streamingType = .subscription
+                    }
                     
                     return StreamingInfo(
-                        platform: provider.provider_name,
-                        type: provider.kind == "subscription" ? .subscription : .rent,
-                        url: url.absoluteString,
-                        price: provider.kind == "subscription" ? "Subscription" : "Rent/Buy"
+                        platform: provider.name,
+                        type: streamingType,
+                        url: provider.url,
+                        price: provider.kind == "flatrate" ? "Subscription" : "Rent/Buy"
                     )
                 }
                 
@@ -184,11 +203,13 @@ class StreamingService: ObservableObject {
                     if !streamingInfos.isEmpty {
                         print("🎬 StreamingService: Updating cache for movie \(movieId) with \(streamingInfos.count) streaming options")
                         self.streamingByMovieId[movieId] = streamingInfos
+                        self.streamingCountsByMovieId[movieId] = (flatrate: resp.counts.flatrate, rent: resp.counts.rent, buy: resp.counts.buy)
                         print("🎬 StreamingService: Cache updated. Total cached movies: \(self.streamingByMovieId.keys.count)")
                     } else {
                         print("🎬 StreamingService: No streaming options found for movie \(movieId)")
                         // Cache empty result to avoid repeated requests
                         self.streamingByMovieId[movieId] = []
+                        self.streamingCountsByMovieId[movieId] = (flatrate: 0, rent: 0, buy: 0)
                     }
                 }
             } catch {
