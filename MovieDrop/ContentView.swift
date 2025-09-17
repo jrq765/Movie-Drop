@@ -458,7 +458,7 @@ struct MovieDetailView: View {
     
     private func shareMovie() {
         // Universal link with cache-busting to refresh iMessage preview
-        let movieURL = "https://moviedrop.app/m/\(movie.id)?region=US&v=2"
+        let movieURL = "https://moviedrop.app/m/\(movie.id)?region=US&v=5"
         
         // Create visual movie card
         Task {

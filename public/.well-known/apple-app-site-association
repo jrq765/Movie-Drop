@@ -2,7 +2,7 @@
   "applinks": {
     "details": [
       {
-        "appID": "TEAMID.com.yourcompany.MovieDrop",
+        "appID": "AFCN9R4Y39.com.moviedrop.app",
         "paths": [ "/m/*" ]
       }
     ]

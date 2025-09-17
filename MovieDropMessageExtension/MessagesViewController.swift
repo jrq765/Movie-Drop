@@ -54,7 +54,7 @@ enum MessageComposer {
         comps?.path = "/m/\(movieId)"
         comps?.queryItems = [
             URLQueryItem(name: "region", value: region),
-            URLQueryItem(name: "v", value: "3") // Cache-busting parameter
+            URLQueryItem(name: "v", value: "5") // Cache-busting parameter
         ]
         
         let finalURL = comps?.url
