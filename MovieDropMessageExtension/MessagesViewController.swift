@@ -53,7 +53,12 @@ enum MessageComposer {
         var comps = URLComponents(string: base)
         comps?.path = "/m/\(movieId)"
         comps?.queryItems = [URLQueryItem(name: "region", value: region)]
-        return comps?.url
+        
+        let finalURL = comps?.url
+        print("🔗 MessageComposer: Building URL - Base: \(base), MovieID: \(movieId), Region: \(region)")
+        print("🔗 MessageComposer: Final URL: \(finalURL?.absoluteString ?? "nil")")
+        
+        return finalURL
     }
 
     static func releaseYear(from date: String?) -> String {
@@ -76,6 +81,9 @@ enum MessageComposer {
 
         if let url = buildURL(base: universalBaseURL, movieId: card.id, region: region) {
             message.url = url
+            print("🔗 MessageComposer: Set message URL to: \(url.absoluteString)")
+        } else {
+            print("❌ MessageComposer: Failed to build URL for movie \(card.id)")
         }
         return message
     }

@@ -7,7 +7,7 @@
 	<key>MOVIEDROP_API_BASE_URL</key>
 	<string>https://moviedrop.app/api</string>
 	<key>MOVIEDROP_BASE_URL</key>
-	<string>https://movie-drop-production.up.railway.app</string>
+	<string>https://moviedrop.app</string>
 	<key>MOVIEDROP_DEFAULT_REGION</key>
 	<string>US</string>
 	<key>NSAppTransportSecurity</key>
