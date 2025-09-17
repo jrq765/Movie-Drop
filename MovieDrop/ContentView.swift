@@ -392,17 +392,14 @@ struct MovieDetailView: View {
                             
                             Spacer()
                             
-                            if let counts = streamingService.streamingCountsByMovieId[movie.id] {
-                                let totalCount = counts.flatrate + counts.rent + counts.buy
-                                if totalCount > 0 {
-                                    Text("\(totalCount) options")
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                        .padding(.horizontal, 8)
-                                        .padding(.vertical, 4)
-                                        .background(Color.gray.opacity(0.2))
-                                        .cornerRadius(8)
-                                }
+                            if let totalCount = streamingService.streamingCounts[movie.id], totalCount > 0 {
+                                Text("\(totalCount) options")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 4)
+                                    .background(Color.gray.opacity(0.2))
+                                    .cornerRadius(8)
                             }
                         }
 

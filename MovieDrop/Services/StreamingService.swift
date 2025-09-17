@@ -118,6 +118,15 @@ class StreamingService: ObservableObject {
         }
         return 0
     }
+    
+    /// Get streaming count for a specific movie ID (for SwiftUI)
+    var streamingCounts: [Int: Int] {
+        var result: [Int: Int] = [:]
+        for (movieId, counts) in streamingCountsByMovieId {
+            result[movieId] = counts.flatrate + counts.rent + counts.buy
+        }
+        return result
+    }
 
     // MARK: - Availability Cache
     private var cachedAvailability: [Int: [StreamingPlatform]] = [:]
