@@ -142,6 +142,10 @@ class StreamingService: ObservableObject {
             }
             
             if let resp = try? JSONDecoder().decode(LocalResponse.self, from: data) {
+                print("🎬 StreamingService: Fetched data for movie \(movieId)")
+                print("🎬 StreamingService: Flatrate providers: \(resp.flatrate?.count ?? 0)")
+                print("🎬 StreamingService: Purchase providers: \(resp.purchase?.count ?? 0)")
+                
                 var allProviders: [Provider] = []
                 if let flatrate = resp.flatrate {
                     allProviders.append(contentsOf: flatrate.map { Provider(provider_id: $0.provider_id, provider_name: $0.provider_name, logo_path: $0.logo_path, display_priority: $0.display_priority, kind: "subscription") })
@@ -150,9 +154,12 @@ class StreamingService: ObservableObject {
                     allProviders.append(contentsOf: purchase)
                 }
                 
+                print("🎬 StreamingService: Total providers: \(allProviders.count)")
+                
                 // Convert to StreamingInfo with direct URLs
                 let streamingInfos: [StreamingInfo] = allProviders.compactMap { provider in
                     let directUrl = self.getDirectURL(for: provider.provider_id, movieTitle: movieTitle)
+                    print("🎬 StreamingService: Provider \(provider.provider_id) (\(provider.provider_name)) -> URL: \(directUrl?.absoluteString ?? "nil")")
                     guard let url = directUrl else { return nil }
                     
                     return StreamingInfo(
@@ -162,6 +169,8 @@ class StreamingService: ObservableObject {
                         price: provider.kind == "subscription" ? "Subscription" : "Rent/Buy"
                     )
                 }
+                
+                print("🎬 StreamingService: Final streaming infos: \(streamingInfos.count)")
                 
                 if !streamingInfos.isEmpty {
                     DispatchQueue.main.async {
