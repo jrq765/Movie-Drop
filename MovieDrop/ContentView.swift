@@ -383,20 +383,51 @@ struct MovieDetailView: View {
                     }
                     
                     // Streaming Options (use direct links from backend when available)
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Where to Watch")
-                            .font(.title2)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.primary)
-
-                        ForEach(streamingService.getStreamingInfo(for: movie), id: \.url) { info in
-                            StreamingInfoButton(info: info)
+                    VStack(alignment: .leading, spacing: 16) {
+                        HStack {
+                            Text("Where to Watch")
+                                .font(.title2)
+                                .fontWeight(.semibold)
+                                .foregroundColor(.primary)
+                            
+                            Spacer()
+                            
+                            if !streamingService.getStreamingInfo(for: movie).isEmpty {
+                                Text("\(streamingService.getStreamingInfo(for: movie).count) options")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 4)
+                                    .background(Color.gray.opacity(0.2))
+                                    .cornerRadius(8)
+                            }
                         }
-                        // Show a subtle note when no links yet
-                        if streamingService.getStreamingInfo(for: movie).isEmpty {
-                            Text("Fetching direct links...")
-                                .font(.footnote)
-                                .foregroundColor(.secondary)
+
+                        let streamingInfo = streamingService.getStreamingInfo(for: movie)
+                        
+                        if streamingInfo.isEmpty {
+                            // Show loading state
+                            HStack {
+                                ProgressView()
+                                    .scaleEffect(0.8)
+                                Text("Finding available streaming options...")
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 20)
+                            .background(Color.gray.opacity(0.1))
+                            .cornerRadius(12)
+                        } else {
+                            // Show available streaming options
+                            LazyVGrid(columns: [
+                                GridItem(.flexible()),
+                                GridItem(.flexible())
+                            ], spacing: 12) {
+                                ForEach(streamingInfo, id: \.url) { info in
+                                    StreamingInfoCard(info: info)
+                                }
+                            }
                         }
                     }
                     
@@ -468,6 +499,113 @@ struct MovieDetailView: View {
     }
 }
 
+struct StreamingInfoCard: View {
+    let info: StreamingInfo
+    
+    var body: some View {
+        Button(action: openLink) {
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Image(systemName: platformIcon)
+                        .font(.title2)
+                        .foregroundColor(platformColor)
+                    
+                    Spacer()
+                    
+                    Image(systemName: "arrow.up.right")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(platformName)
+                        .font(.headline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.primary)
+                        .lineLimit(1)
+                    
+                    Text(priceText)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .lineLimit(1)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(16)
+            .background(Color(.systemGray6))
+            .cornerRadius(12)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(platformColor.opacity(0.3), lineWidth: 1)
+            )
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+    
+    private var platformIcon: String {
+        let platform = info.platform.lowercased()
+        if platform.contains("netflix") { return "play.rectangle.fill" }
+        if platform.contains("prime") || platform.contains("amazon") { return "play.rectangle.fill" }
+        if platform.contains("hulu") { return "play.rectangle.fill" }
+        if platform.contains("disney") { return "play.rectangle.fill" }
+        if platform.contains("max") || platform.contains("hbo") { return "play.rectangle.fill" }
+        if platform.contains("apple") { return "play.rectangle.fill" }
+        if platform.contains("youtube") { return "play.rectangle.fill" }
+        if platform.contains("paramount") { return "play.rectangle.fill" }
+        if platform.contains("peacock") { return "play.rectangle.fill" }
+        return "play.rectangle.fill"
+    }
+    
+    private var platformColor: Color {
+        let platform = info.platform.lowercased()
+        if platform.contains("netflix") { return .red }
+        if platform.contains("prime") || platform.contains("amazon") { return .blue }
+        if platform.contains("hulu") { return .green }
+        if platform.contains("disney") { return .blue }
+        if platform.contains("max") || platform.contains("hbo") { return .purple }
+        if platform.contains("apple") { return .gray }
+        if platform.contains("youtube") { return .red }
+        if platform.contains("paramount") { return .blue }
+        if platform.contains("peacock") { return .blue }
+        return Color(red: 0.97, green: 0.33, blue: 0.21)
+    }
+    
+    private var platformName: String {
+        let platform = info.platform.lowercased()
+        if platform.contains("netflix") { return "Netflix" }
+        if platform.contains("prime") || platform.contains("amazon") { return "Prime Video" }
+        if platform.contains("hulu") { return "Hulu" }
+        if platform.contains("disney") { return "Disney+" }
+        if platform.contains("max") || platform.contains("hbo") { return "Max" }
+        if platform.contains("apple") { return "Apple TV" }
+        if platform.contains("youtube") { return "YouTube" }
+        if platform.contains("paramount") { return "Paramount+" }
+        if platform.contains("peacock") { return "Peacock" }
+        return info.platform
+    }
+    
+    private var priceText: String {
+        switch info.type {
+        case .subscription:
+            return "Subscription"
+        case .rent:
+            return "Rent"
+        case .buy:
+            return "Buy"
+        case .free:
+            return "Free"
+        }
+    }
+    
+    private func openLink() {
+        guard let url = URL(string: info.url) else { return }
+        if UIApplication.shared.canOpenURL(url) {
+            UIApplication.shared.open(url)
+        }
+    }
+}
+
+// Keep the old button for backward compatibility
 struct StreamingInfoButton: View {
     let info: StreamingInfo
     
