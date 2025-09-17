@@ -5,7 +5,7 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>MOVIEDROP_API_BASE_URL</key>
-	<string>https://movie-drop-production.up.railway.app</string>
+	<string>https://moviedrop.app/api</string>
 	<key>MOVIEDROP_BASE_URL</key>
 	<string>https://movie-drop-production.up.railway.app</string>
 	<key>MOVIEDROP_DEFAULT_REGION</key>
