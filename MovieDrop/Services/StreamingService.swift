@@ -87,6 +87,9 @@ class StreamingService: ObservableObject {
     /// Published cache for total counts
     @Published private(set) var streamingCountsByMovieId: [Int: (flatrate: Int, rent: Int, buy: Int)] = [:]
     
+    /// Published simplified counts for SwiftUI
+    @Published private(set) var streamingCounts: [Int: Int] = [:]
+    
     /// Track fetch operations in progress to avoid duplicates
     private var fetchInProgress: Set<Int> = []
 
@@ -119,14 +122,6 @@ class StreamingService: ObservableObject {
         return 0
     }
     
-    /// Get streaming count for a specific movie ID (for SwiftUI)
-    var streamingCounts: [Int: Int] {
-        var result: [Int: Int] = [:]
-        for (movieId, counts) in streamingCountsByMovieId {
-            result[movieId] = counts.flatrate + counts.rent + counts.buy
-        }
-        return result
-    }
 
     // MARK: - Availability Cache
     private var cachedAvailability: [Int: [StreamingPlatform]] = [:]
@@ -213,12 +208,14 @@ class StreamingService: ObservableObject {
                         print("🎬 StreamingService: Updating cache for movie \(movieId) with \(streamingInfos.count) streaming options")
                         self.streamingByMovieId[movieId] = streamingInfos
                         self.streamingCountsByMovieId[movieId] = (flatrate: resp.counts.flatrate, rent: resp.counts.rent, buy: resp.counts.buy)
+                        self.streamingCounts[movieId] = resp.counts.flatrate + resp.counts.rent + resp.counts.buy
                         print("🎬 StreamingService: Cache updated. Total cached movies: \(self.streamingByMovieId.keys.count)")
                     } else {
                         print("🎬 StreamingService: No streaming options found for movie \(movieId)")
                         // Cache empty result to avoid repeated requests
                         self.streamingByMovieId[movieId] = []
                         self.streamingCountsByMovieId[movieId] = (flatrate: 0, rent: 0, buy: 0)
+                        self.streamingCounts[movieId] = 0
                     }
                 }
             } catch {
