@@ -5,6 +5,10 @@ class MovieService: ObservableObject {
         return Bundle.main.object(forInfoDictionaryKey: "MOVIEDROP_API_BASE_URL") as? String ?? "https://moviedrop.app/api"
     }
     
+    private var watchlistBaseURL: String {
+        return "https://movie-drop-production.up.railway.app/api"
+    }
+    
     func searchMovies(query: String) async throws -> [Movie] {
         print("🔍 MovieService: Starting search for '\(query)'")
         
@@ -143,7 +147,7 @@ class MovieService: ObservableObject {
         
         let timestamp = Int(Date().timeIntervalSince1970)
         let randomId = Int.random(in: 1000...9999)
-        let urlString = "\(baseURL)/movies/recommendations/\(userId)?limit=20&t=\(timestamp)&r=\(randomId)"
+        let urlString = "\(watchlistBaseURL)/movies/recommendations/\(userId)?limit=20&t=\(timestamp)&r=\(randomId)"
         print("🔗 MovieService: Calling recommendations URL: \(urlString)")
         guard let url = URL(string: urlString) else {
             print("❌ MovieService: Invalid URL for recommendations")
@@ -176,7 +180,7 @@ class MovieService: ObservableObject {
     func addToWatchlist(userId: Int, movie: Movie) async throws {
         print("📝 MovieService: Adding \(movie.title) to watchlist for user \(userId)")
         
-        guard let url = URL(string: "\(baseURL)/movies/watchlist") else {
+        guard let url = URL(string: "\(watchlistBaseURL)/movies/watchlist") else {
             print("❌ MovieService: Invalid URL for watchlist")
             throw MovieServiceError.invalidURL
         }
@@ -215,7 +219,7 @@ class MovieService: ObservableObject {
     func getWatchlist(userId: Int) async throws -> [Movie] {
         print("📋 MovieService: Getting watchlist for user \(userId)")
         
-        guard let url = URL(string: "\(baseURL)/movies/watchlist/\(userId)") else {
+        guard let url = URL(string: "\(watchlistBaseURL)/movies/watchlist/\(userId)") else {
             print("❌ MovieService: Invalid URL for watchlist")
             throw MovieServiceError.invalidURL
         }
