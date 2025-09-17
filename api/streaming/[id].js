@@ -7,9 +7,8 @@ module.exports = async function handler(req, res) {
   try {
     const { id } = req.query;
     const region = req.query.region || 'US';
-    const kind = req.query.kind || 'flatrate';
     const primaryOnly = req.query.primaryOnly === 'true';
-    const limit = primaryOnly ? 1 : Math.min(parseInt(req.query.limit) || 8, 12);
+    const limit = primaryOnly ? 1 : Math.min(parseInt(req.query.limit) || 12, 12);
     
     if (!id) {
       return res.status(400).json({ error: 'Movie ID is required' });
@@ -35,40 +34,60 @@ module.exports = async function handler(req, res) {
 
     const regionData = providersData.results[region] || {};
     
-    // Get providers by kind
-    let selectedProviders = [];
-    if (kind === 'flatrate') {
-      selectedProviders = regionData.flatrate || [];
-    } else if (kind === 'rent') {
-      selectedProviders = regionData.rent || [];
-    } else if (kind === 'buy') {
-      selectedProviders = regionData.buy || [];
+    // Get ALL providers (flatrate, rent, buy) and combine by platform
+    const allProviders = [
+      ...(regionData.flatrate || []).map(p => ({ ...p, kind: 'flatrate' })),
+      ...(regionData.rent || []).map(p => ({ ...p, kind: 'rent' })),
+      ...(regionData.buy || []).map(p => ({ ...p, kind: 'buy' }))
+    ];
+    
+    // Combine providers by platform name
+    const platformMap = new Map();
+    
+    for (const provider of allProviders) {
+      // Map provider names to display names
+      let platformName = provider.provider_name;
+      if (platformName === 'Amazon Prime Video' || platformName === 'Amazon Video') {
+        platformName = 'Prime Video';
+      }
+      
+      if (!platformMap.has(platformName)) {
+        platformMap.set(platformName, {
+          name: platformName,
+          kinds: new Set(),
+          url: getDirectUrl(provider.provider_id, movieData.title),
+          logo_path: provider.logo_path,
+          provider_id: provider.provider_id,
+          display_priority: provider.display_priority
+        });
+      }
+      
+      platformMap.get(platformName).kinds.add(provider.kind);
     }
     
-    // Sort by display priority (lower = more prominent)
-    selectedProviders.sort((a, b) => a.display_priority - b.display_priority);
+    // Convert to array and sort by display priority
+    const combinedProviders = Array.from(platformMap.values())
+      .sort((a, b) => a.display_priority - b.display_priority)
+      .slice(0, limit);
     
-    // Apply limit
-    const limitedProviders = selectedProviders.slice(0, limit);
-    
-    // Create response structure
+    // Create response structure with combined providers
     const response = {
       id: parseInt(id),
       title: movieData.title,
       year: new Date(movieData.release_date).getFullYear(),
       region: region,
-      primary: limitedProviders.length > 0 ? {
-        name: limitedProviders[0].provider_name,
-        kind: kind,
-        url: getDirectUrl(limitedProviders[0].provider_id, movieData.title),
-        logo_path: limitedProviders[0].logo_path,
-        provider_id: limitedProviders[0].provider_id,
-        display_priority: limitedProviders[0].display_priority
+      primary: combinedProviders.length > 0 ? {
+        name: combinedProviders[0].name,
+        kind: getCombinedKind(combinedProviders[0].kinds),
+        url: combinedProviders[0].url,
+        logo_path: combinedProviders[0].logo_path,
+        provider_id: combinedProviders[0].provider_id,
+        display_priority: combinedProviders[0].display_priority
       } : null,
-      providers: limitedProviders.map(provider => ({
-        name: provider.provider_name,
-        kind: kind,
-        url: getDirectUrl(provider.provider_id, movieData.title),
+      providers: combinedProviders.map(provider => ({
+        name: provider.name,
+        kind: getCombinedKind(provider.kinds),
+        url: provider.url,
         logo_path: provider.logo_path,
         provider_id: provider.provider_id,
         display_priority: provider.display_priority
@@ -89,6 +108,15 @@ module.exports = async function handler(req, res) {
   }
 };
 
+// Helper function to determine combined kind
+function getCombinedKind(kinds) {
+  if (kinds.has('flatrate')) return 'flatrate';
+  if (kinds.has('rent') && kinds.has('buy')) return 'rent/buy';
+  if (kinds.has('rent')) return 'rent';
+  if (kinds.has('buy')) return 'buy';
+  return 'flatrate';
+}
+
 // Helper function to get direct URLs for providers
 function getDirectUrl(providerId, movieTitle) {
   const encodedTitle = encodeURIComponent(movieTitle);
@@ -96,7 +124,7 @@ function getDirectUrl(providerId, movieTitle) {
   switch (providerId) {
     case 8: return `https://www.netflix.com/search?q=${encodedTitle}`;
     case 9:
-    case 10: return `https://www.amazon.com/s?k=${encodedTitle}&i=movies-tv`;
+    case 10: return `https://www.amazon.com/Prime-Video/b?node=2676882011&search=${encodedTitle}`;
     case 15: return `https://www.hulu.com/search?q=${encodedTitle}`;
     case 337: return `https://www.disneyplus.com/search?q=${encodedTitle}`;
     case 1899:
