@@ -190,7 +190,7 @@ class StreamingService: ObservableObject {
                     
                     switch provider.kind {
                     case "flatrate":
-                        streamingType = .flatrate
+                        streamingType = .subscription
                         priceText = "Subscription"
                     case "rent/buy":
                         streamingType = .rentBuy
@@ -202,7 +202,7 @@ class StreamingService: ObservableObject {
                         streamingType = .buy
                         priceText = "Buy"
                     default:
-                        streamingType = .flatrate
+                        streamingType = .subscription
                         priceText = "Available"
                     }
                     
@@ -229,7 +229,6 @@ class StreamingService: ObservableObject {
                     
                     // Then sort by type priority
                     let typePriority: [StreamingInfo.StreamingType: Int] = [
-                        .flatrate: 1,
                         .subscription: 1,
                         .rentBuy: 2,
                         .rent: 3,
