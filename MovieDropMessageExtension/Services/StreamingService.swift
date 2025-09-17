@@ -43,7 +43,11 @@ class StreamingService: ObservableObject {
                 platform: platform.displayName,
                 type: getStreamingType(for: platform),
                 url: url?.absoluteString ?? "",
-                price: getPrice(for: platform)
+                price: getPrice(for: platform),
+                providerId: nil,
+                logoPath: nil,
+                displayPriority: nil,
+                kind: nil
             )
         }
     }
