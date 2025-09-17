@@ -339,10 +339,7 @@ struct MovieDetailView: View {
     let movie: Movie
     @ObservedObject var streamingService: StreamingService
     @Environment(\.dismiss) private var dismiss
-    
-    private var totalStreamingCount: Int {
-        streamingService.getStreamingCount(for: movie)
-    }
+    @State private var totalStreamingCount: Int = 0
     
     var body: some View {
         NavigationView {
@@ -461,7 +458,17 @@ struct MovieDetailView: View {
                     }
                 }
             }
+            .onAppear {
+                updateStreamingCount()
+            }
+            .onChange(of: streamingService.streamingCountsByMovieId) { _, _ in
+                updateStreamingCount()
+            }
         }
+    }
+    
+    private func updateStreamingCount() {
+        totalStreamingCount = streamingService.getStreamingCount(for: movie)
     }
     
     private func shareMovie() {
