@@ -339,7 +339,6 @@ struct MovieDetailView: View {
     let movie: Movie
     @ObservedObject var streamingService: StreamingService
     @Environment(\.dismiss) private var dismiss
-    @State private var totalStreamingCount: Int = 0
     
     var body: some View {
         NavigationView {
@@ -393,14 +392,17 @@ struct MovieDetailView: View {
                             
                             Spacer()
                             
-                            if totalStreamingCount > 0 {
-                                Text("\(totalStreamingCount) options")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 4)
-                                    .background(Color.gray.opacity(0.2))
-                                    .cornerRadius(8)
+                            if let counts = streamingService.streamingCountsByMovieId[movie.id] {
+                                let totalCount = counts.flatrate + counts.rent + counts.buy
+                                if totalCount > 0 {
+                                    Text("\(totalCount) options")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 4)
+                                        .background(Color.gray.opacity(0.2))
+                                        .cornerRadius(8)
+                                }
                             }
                         }
 
@@ -458,18 +460,9 @@ struct MovieDetailView: View {
                     }
                 }
             }
-            .onAppear {
-                updateStreamingCount()
-            }
-            .onChange(of: streamingService.streamingCountsByMovieId) { _, _ in
-                updateStreamingCount()
-            }
         }
     }
     
-    private func updateStreamingCount() {
-        totalStreamingCount = streamingService.getStreamingCount(for: movie)
-    }
     
     private func shareMovie() {
         // Universal link with cache-busting to refresh iMessage preview
