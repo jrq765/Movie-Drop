@@ -23,9 +23,9 @@ class MovieService: ObservableObject {
             }
         }
         
-        // Use backend API
+        // Use consolidated backend API
         guard let encodedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
-              let url = URL(string: "\(baseURL)/movies/search?query=\(encodedQuery)") else {
+              let url = URL(string: "\(baseURL)/movies?type=search&query=\(encodedQuery)") else {
             print("❌ Invalid URL for query: \(query)")
             completion(.failure(MovieServiceError.invalidURL))
             return

@@ -8,9 +8,9 @@ class MovieService: ObservableObject {
     func searchMovies(query: String) async throws -> [Movie] {
         print("🔍 MovieService: Starting search for '\(query)'")
         
-        // Use backend API
+        // Use consolidated backend API
         guard let encodedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
-              let url = URL(string: "\(baseURL)/movies/search?query=\(encodedQuery)") else {
+              let url = URL(string: "\(baseURL)/movies?type=search&query=\(encodedQuery)") else {
             print("❌ MovieService: Invalid URL")
             throw MovieServiceError.invalidURL
         }
@@ -102,7 +102,7 @@ class MovieService: ObservableObject {
         print("🔍 MovieService: Getting randomized popular movies")
         let timestamp = Int(Date().timeIntervalSince1970)
         let randomId = Int.random(in: 1000...9999)
-        var urlString = "\(baseURL)/movies/popular?randomize=true&t=\(timestamp)&r=\(randomId)"
+        var urlString = "\(baseURL)/movies?randomize=true&t=\(timestamp)&r=\(randomId)"
         if !excludeIds.isEmpty {
             let csv = excludeIds.map(String.init).joined(separator: ",")
             urlString += "&exclude=\(csv)"
