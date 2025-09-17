@@ -23,7 +23,7 @@ interface WatchProvidersResponse {
   buy?: WatchProvider[]
 }
 
-const MOVIEDROP_API_BASE = process.env.MOVIEDROP_API_BASE || 'https://perceptive-flow-production.up.railway.app/api'
+const MOVIEDROP_API_BASE = process.env.MOVIEDROP_API_BASE || 'https://moviedrop.app/api'
 export const TMDB_IMAGE_BASE = process.env.TMDB_IMAGE_BASE ?? "https://image.tmdb.org/t/p"
 
 export function posterUrl(path?: string, size: "w500"|"w780"|"original"="w780"): string | null {
