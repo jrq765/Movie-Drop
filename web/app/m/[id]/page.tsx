@@ -111,54 +111,76 @@ export default async function MoviePage({ params, searchParams }: MoviePageProps
               {/* Where to Watch */}
               <div className="mt-2">
                 <h2 className="text-xl font-semibold mb-3">Where to Watch</h2>
-                <div className="flex flex-wrap gap-2">
-                  {watchProviders && watchProviders.map((provider) => (
-                    <a
-                      key={provider.provider_id}
-                      href={provider.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="group inline-flex items-center gap-2 rounded-full border border-md-border bg-white/5 hover:bg-white/10 px-3 py-1.5 text-sm"
-                    >
-                      {providerLogo(provider.logo_path ?? undefined) && (
-                        <img 
-                          src={providerLogo(provider.logo_path ?? undefined)!} 
-                          alt="" 
-                          className="h-4 w-4 rounded-[4px]" 
-                        />
-                      )}
-                      <span>{provider.provider_name}</span>
-                      <span className="text-xs text-md-inkMuted">
-                        {provider.kind === 'flatrate' ? 'Subscription' : 
-                         provider.kind === 'rent/buy' ? 'Rent/Buy' :
-                         provider.kind === 'rent' ? 'Rent' :
-                         provider.kind === 'buy' ? 'Buy' : 'Available'}
-                      </span>
-                    </a>
-                  ))}
-                  
-                  {(!watchProviders || watchProviders.length === 0) && (
-                    <p className="text-md-inkMuted text-sm">
-                      Streaming availability information is not available for this movie.
-                    </p>
-                  )}
-                </div>
+                {watchProviders && watchProviders.length > 0 ? (
+                  <div className="grid grid-cols-2 gap-3">
+                    {watchProviders.map((provider) => (
+                      <a
+                        key={provider.provider_id}
+                        href={provider.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group flex items-center gap-3 rounded-xl border border-md-border bg-white/5 hover:bg-white/10 p-4 transition-colors"
+                      >
+                        <div className="flex-shrink-0">
+                          {providerLogo(provider.logo_path ?? undefined) ? (
+                            <img 
+                              src={providerLogo(provider.logo_path ?? undefined)!} 
+                              alt={provider.provider_name}
+                              className="h-8 w-8 rounded-lg object-cover" 
+                            />
+                          ) : (
+                            <div className="h-8 w-8 rounded-lg bg-md-accent/20 flex items-center justify-center">
+                              <span className="text-md-accent text-xs font-semibold">
+                                {provider.provider_name.charAt(0)}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-sm truncate">{provider.provider_name}</div>
+                          <div className="text-xs text-md-inkMuted">
+                            {provider.kind === 'flatrate' ? 'Subscription' : 
+                             provider.kind === 'rent/buy' ? 'Rent/Buy' :
+                             provider.kind === 'rent' ? 'Rent' :
+                             provider.kind === 'buy' ? 'Buy' : 'Available'}
+                          </div>
+                        </div>
+                        <div className="flex-shrink-0">
+                          <svg className="h-4 w-4 text-md-inkMuted group-hover:text-md-accent transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                          </svg>
+                        </div>
+                      </a>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="rounded-xl border border-md-border bg-white/5 p-6 text-center">
+                    <div className="text-md-inkMuted text-sm">
+                      <p className="mb-2">No streaming options found for this movie.</p>
+                      <p className="text-xs">Check back later or try a different region.</p>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Actions */}
               <div className="mt-auto flex flex-wrap gap-3">
                 <a 
-                  href={providersLink} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 rounded-full bg-md-accent px-4 py-2 text-sm font-medium text-white hover:bg-md-accent600"
+                  href={`moviedrop://movie/${params.id}`}
+                  className="inline-flex items-center gap-2 rounded-full bg-md-accent px-4 py-2 text-sm font-medium text-white hover:bg-md-accent600 transition-colors"
                 >
-                  Open Watch Options
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                  </svg>
+                  Open in App
                 </a>
                 <button 
-                  className="rounded-full border border-md-border px-4 py-2 text-sm hover:bg-white/5"
+                  className="rounded-full border border-md-border px-4 py-2 text-sm hover:bg-white/5 transition-colors"
                   onClick={copyCurrentUrl}
                 >
+                  <svg className="h-4 w-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  </svg>
                   Copy Link
                 </button>
               </div>
