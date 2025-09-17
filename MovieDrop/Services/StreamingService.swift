@@ -79,46 +79,32 @@ class StreamingService: ObservableObject {
         return URL(string: "\(baseURL)\(encodedTitle)")
     }
     
-    /// Fetch available platforms for a given movie from backend
-    func getAvailablePlatforms(for movie: Movie) -> [StreamingPlatform] {
-        // For now, return a more realistic subset based on movie characteristics
-        // In the future, this could be replaced with real API data
-        
-        // Kick off background fetch to update cached availability if needed
-        fetchAvailability(movieId: movie.id, movieTitle: movie.title)
-        
-        // Return cached data if available
-        if let cached = cachedAvailability[movie.id] {
-            return cached
-        }
-        
-        // For now, return a smaller, more realistic set of platforms
-        // This simulates that not all movies are available on all platforms
-        let allPlatforms: [StreamingPlatform] = [.netflix, .prime, .apple, .hulu, .disney, .hbo, .youtube]
-        
-        // Use movie ID to consistently return the same platforms for the same movie
-        let seed = movie.id % 7 // Use movie ID as seed for consistency
-        let platformCount = 2 + (seed % 3) // Return 2-4 platforms
-        
-        // Shuffle platforms based on movie ID for consistency
-        var generator = SeededRandomNumberGenerator(seed: UInt64(movie.id))
-        let shuffledPlatforms = allPlatforms.shuffled(using: &generator)
-        
-        return Array(shuffledPlatforms.prefix(platformCount))
-    }
+    // Removed getAvailablePlatforms - only use real API data via getStreamingInfo
     
     /// Published cache for UI updates
     @Published private(set) var streamingByMovieId: [Int: [StreamingInfo]] = [:]
+    
+    /// Track fetch operations in progress to avoid duplicates
+    private var fetchInProgress: Set<Int> = []
 
-    /// Get streaming info with direct links when available
+    /// Get streaming info with direct links when available - ONLY REAL DATA
     func getStreamingInfo(for movie: Movie) -> [StreamingInfo] {
+        // Only return real cached data, never hardcoded fallbacks
         if let cached = streamingByMovieId[movie.id] { 
             print("🎬 StreamingService: Returning cached data for movie \(movie.id): \(cached.count) options")
             return cached 
         }
-        // Trigger fetch; return empty for first render (no placeholders)
-        print("🎬 StreamingService: No cached data for movie \(movie.id), triggering fetch")
-        fetchAvailability(movieId: movie.id, movieTitle: movie.title)
+        
+        // Trigger fetch if not already in progress
+        if !fetchInProgress.contains(movie.id) {
+            print("🎬 StreamingService: Starting fetch for movie \(movie.id)")
+            fetchInProgress.insert(movie.id)
+            fetchAvailability(movieId: movie.id, movieTitle: movie.title)
+        } else {
+            print("🎬 StreamingService: Fetch already in progress for movie \(movie.id)")
+        }
+        
+        // Return empty array until real data arrives - NO FALLBACKS
         return []
     }
 
@@ -191,19 +177,28 @@ class StreamingService: ObservableObject {
                 
                 print("🎬 StreamingService: Final streaming infos: \(streamingInfos.count)")
                 
-                if !streamingInfos.isEmpty {
-                    DispatchQueue.main.async {
+                DispatchQueue.main.async {
+                    // Remove from fetch progress
+                    self.fetchInProgress.remove(movieId)
+                    
+                    if !streamingInfos.isEmpty {
                         print("🎬 StreamingService: Updating cache for movie \(movieId) with \(streamingInfos.count) streaming options")
                         self.streamingByMovieId[movieId] = streamingInfos
                         print("🎬 StreamingService: Cache updated. Total cached movies: \(self.streamingByMovieId.keys.count)")
+                    } else {
+                        print("🎬 StreamingService: No streaming options found for movie \(movieId)")
+                        // Cache empty result to avoid repeated requests
+                        self.streamingByMovieId[movieId] = []
                     }
-                } else {
-                    print("🎬 StreamingService: No streaming options found for movie \(movieId)")
                 }
             } catch {
                 print("🎬 StreamingService: JSON decode error for movie \(movieId): \(error)")
                 if let dataString = String(data: data, encoding: .utf8) {
                     print("🎬 StreamingService: Raw response: \(dataString)")
+                }
+                DispatchQueue.main.async {
+                    // Remove from fetch progress on error
+                    self.fetchInProgress.remove(movieId)
                 }
             }
         }.resume()
